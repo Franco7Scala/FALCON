@@ -1,11 +1,9 @@
 # Agente 1 - Elaborazione della domanda dell'utente
 from typing import TypedDict, Optional
 from langgraph.graph import StateGraph, END
-from langchain_huggingface import HuggingFacePipeline, ChatHuggingFace
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from utils import get_pipeline
+from utils import crea_llm, get_descrizione_dominio
 
 # Stato condiviso del grafo
 class Agent1State(TypedDict):
@@ -17,35 +15,20 @@ class Agent1State(TypedDict):
     richiesta_elaborata: Optional[str] # Output da passare all'Agente 2
     messaggio_errore: Optional[str]
 
-# Inizializzazione del modello LLM (Qwen2.5-0.5B-Instruct)
-def crea_llm(model_name : str) -> ChatHuggingFace:
-    """
-    Carica Qwen2.5-0.5B-Instruct in locale e lo espone come ChatModel
-    LangChain, cosi' da poter usare i prompt template a messaggi
-    (system/human) e sfruttare il chat template del modello.
-    """
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name)
-
-    hf_pipeline = get_pipeline("text-generation", model, tokenizer)
-
-    llm = HuggingFacePipeline(pipeline = hf_pipeline)
-    return ChatHuggingFace(llm = llm)
-
 # Estrae una delle tre etichette valide dall'output grezzo del LLM.
 def _estrai_classificazione(testo: str) -> str:
     testo_upper = testo.strip().upper()
 
-    if "FUORI_CONTESTO" in testo_upper:
-        return "FUORI_CONTESTO"
+    if "OUT_OF_CONTEXT" in testo_upper:
+        return "OUT_OF_CONTEXT"
     
-    if "NON_CHIARA" in testo_upper:
-        return "NON_CHIARA"
+    if "UNCLEAR" in testo_upper:
+        return "UNCLEAR"
     
-    if "CHIARA" in testo_upper:
-        return "CHIARA"
+    if "CLEAR" in testo_upper:
+        return "CLEAR"
     
-    return "NON_CHIARA"
+    return "UNCLEAR"
 
 # Nodo "Valuta Request": classifica la richiesta
 def valuta_request(state: Agent1State) -> Agent1State:
@@ -112,17 +95,17 @@ def prepara_output_successo(state: Agent1State) -> Agent1State:
 def route_dopo_valutazione(state: Agent1State) -> str:
 
     if state["tentativi_miglioramento"] >= MAX_TENTATIVI_MIGLIORAMENTO:
-        return "fuori_contesto"
+        return "OUT_OF_CONTEXT"
 
     classificazione = state["classificazione"]
 
-    if classificazione == "CHIARA":
-        return "chiara"
+    if classificazione == "CLEAR":
+        return "CLEAR"
     
-    if classificazione == "FUORI_CONTESTO":
-        return "fuori_contesto"
+    if classificazione == "OUT_OF_CONTEXT":
+        return "OUT_OF_CONTEXT"
     
-    return "non_chiara"
+    return "UNCLEAR"
 
 # Costruzione del grafo LangGraph
 def costruisci_agente_1():
@@ -139,9 +122,9 @@ def costruisci_agente_1():
         "valuta_request",
         route_dopo_valutazione,
         {
-            "chiara": "prepara_output_successo",
-            "non_chiara": "migliora_request",
-            "fuori_contesto": "invio_messaggio_errore",
+            "CLEAR": "prepara_output_successo",
+            "UNCLEAR": "migliora_request",
+            "OUT_OF_CONTEXT": "invio_messaggio_errore",
         },
     )
 
@@ -153,20 +136,33 @@ def costruisci_agente_1():
 
 def get_prompt_valutazione() -> ChatPromptTemplate:
 
+    descrizione_dominio = get_descrizione_dominio()
+
     return ChatPromptTemplate.from_messages \
     (
         [
             ("system",
-            "Sei un modulo di classificazione di un sistema che trasforma domande in "
-            "linguaggio naturale in query SQL. Classifica la richiesta dell'utente "
-            "in una di queste tre categorie:\n"
-            "- CHIARA: e' una domanda chiara e sufficientemente specifica per essere "
-            "trasformata in una query SQL.\n"
-            "- NON_CHIARA: riguarda un'interrogazione al database ma e' vaga, "
-            "ambigua o incompleta.\n"
-            "- FUORI_CONTESTO: non e' affatto un'interrogazione su un database "
-            "(es. saluti, richieste completamente estranee).\n\n"
-            "Rispondi solo con una di queste tre parole, senza altro testo."),
+            "You are a classification module for a system that converts natural language "
+            "questions into SQL queries over a specific database. "
+            f"{descrizione_dominio}\n\n"
+            "Classify the user's request into one of these three categories:\n"
+            "- CLEAR: a question that is clear and specific enough to be "
+            "converted into an SQL query about this database.\n"
+            "- UNCLEAR: relates to a query about this database, but is vague, "
+            "ambiguous, or incomplete.\n"
+            "- OUT_OF_CONTEXT: not related to this database at all "
+            "(e.g., greetings, small talk, weather, general knowledge questions, "
+            "or anything that cannot be answered by querying this database).\n\n"
+            "Examples:\n"
+            "Request: \"Show me all customers who spent more than 100 last month\"\n"
+            "Answer: CLEAR\n\n"
+            "Request: \"Show me the customers\"\n"
+            "Answer: UNCLEAR\n\n"
+            "Request: \"What's the weather like today in Rome?\"\n"
+            "Answer: OUT_OF_CONTEXT\n\n"
+            "Request: \"Hello, how are you?\"\n"
+            "Answer: OUT_OF_CONTEXT\n\n"
+            "Respond with only one of these three words, with no other text."),
             ("human", "{richiesta}")
         ]
     )
@@ -177,14 +173,15 @@ def get_prompt_miglioramento() -> ChatPromptTemplate:
     (
         [
             ("system",
-            "Sei un modulo che riformula richieste ambigue o incomplete rivolte a un "
-            "database, rendendole chiare e precise, mantenendo l'intento originale "
-            "dell'utente. Rispondi SOLO con la richiesta riformulata in una singola "
-            "frase, senza spiegazioni aggiuntive."),
+            "You are a module that reformulates ambiguous or incomplete requests made to a "
+            "database, making them clear and precise while preserving the user's "
+            "original intent. Respond only with the reformulated request in a single "
+            "sentence, without additional explanations."),
             ("human", "{richiesta}")
         ]
     )
 
+# Verrà sostituito con un modello più potente, ad esempio "google/gemma-2-9b-it"
 MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
 MAX_TENTATIVI_MIGLIORAMENTO = 3 # Serve ad evitare loop infiniti
 LLM = crea_llm(MODEL_NAME)
@@ -203,7 +200,7 @@ if __name__ == "__main__":
 
     richieste_di_prova = \
     [
-        "Mostrami i clienti che hanno speso di piu' nell'ultimo anno",
+        "Mostrami i clienti che vanno di nome Mario",
         "dimmi qualcosa su quelli",
         "Che tempo fa oggi a Roma?",
     ]
