@@ -17,9 +17,8 @@ def get_pipeline(task, model, tokenizer, max_new_tokens = 128, do_sample = False
 # Inizializza il modello LLM
 def crea_llm(model_name: str) -> ChatHuggingFace:
     """
-    Carica il modello inserito come parametro in locale e lo espone come ChatModel
-    LangChain, cosi' da poter usare i prompt template a messaggi
-    (system/human) e sfruttare il chat template del modello.
+    It loads the model passed as a parameter locally and exposes it as a LangChain `ChatModel`, 
+    enabling the use of message-based prompt templates (system/human) and leveraging the model's chat capabilities.
     """
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(model_name)
@@ -29,16 +28,15 @@ def crea_llm(model_name: str) -> ChatHuggingFace:
     llm = HuggingFacePipeline(pipeline = hf_pipeline)
     return ChatHuggingFace(llm = llm)
 
-# Connessione al database, condivisa tra tutti gli agenti.
-DB_PATH = "negozio.db" # Database Fittizio
+# Database connection, shared among all agents.
+DB_PATH = "negozio.db" # Fictitious Database
 DB = SQLDatabase.from_uri(f"sqlite:///{DB_PATH}")
 
 def get_descrizione_dominio() -> str:
     """
-    Breve descrizione testuale del dominio del database (solo nomi delle
-    tabelle, non lo schema completo), utile all'Agente 1 per capire se una
-    richiesta e' pertinente, senza il dettagli sullo schema completo
-    che invece serve solo all'Agente 2 per generare la query SQL vera e propria.
+    A brief textual description of the database domain (table names only, not the full schema), 
+    useful for Agent 1 to determine if a request is relevant, without the full schema details—which are
+    needed only by Agent 2 to generate the actual SQL query.
     """
     tabelle = DB.get_usable_table_names()
-    return f"The database contains the following tables: {', '.join(tabelle)}."
+    return f"Il database contiene le seguenti tabelle: {', '.join(tabelle)}."
