@@ -143,7 +143,8 @@ def get_prompt_valutazione() -> ChatPromptTemplate:
 
 def valuta_informazioni(state: Agent1State) -> Agent1State:
 
-    output_grezzo = CHAIN_VALUTAZIONE.invoke(
+    output_grezzo = CHAIN_VALUTAZIONE.invoke \
+    (
         {
             "richiesta": state["richiesta_utente"],
             "informazioni": state["informazioni_estratte"],
