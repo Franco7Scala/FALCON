@@ -62,15 +62,15 @@ def get_prompt_generazione() -> ChatPromptTemplate:
     (
         [
             ("system",
-             "Sei un modulo che traduce informazioni estratte da una "
-             "richiesta in linguaggio naturale in query SQL valide, "
-             "basandoti esclusivamente sullo schema del database fornito. "
-             "Rispondi SOLO con la query SQL, senza commenti, spiegazioni o "
-             "blocchi di codice markdown."),
+             "You are a module that translates information extracted from a "
+             "natural language request into valid SQL queries, "
+             "based exclusively on the provided database schema. "
+             "Respond ONLY with the SQL query, without comments, explanations, or "
+             "markdown code blocks."),
             ("human",
-             "Schema del database:\n{schema}\n\n"
-             "Informazioni estratte dalla richiesta dell'utente:\n{informazioni_estratte}\n\n"
-             "Genera la query SQL corrispondente."),
+             "Database Schema:\n{schema}\n\n"
+             "Information extracted from the user's request:\n{informazioni_estratte}\n\n"
+             "Generate the corresponding SQL query."),
         ]
     )
 
@@ -97,30 +97,27 @@ def genera_query(state: Agent2State) -> Agent2State:
         "messaggio_errore": state["messaggio_errore"],
     }
 
-
 # Node "Valuta Query SQL"
 def get_prompt_valutazione() -> ChatPromptTemplate:
     return ChatPromptTemplate.from_messages \
     (
         [
             ("system",
-             "Sei un modulo che verifica se una query SQL risponde "
-             "correttamente alle informazioni estratte dalla richiesta "
-             "originale dell'utente, rispetto allo schema del database "
-             "fornito. Controlla: 1) la sintassi SQL, 2) che tabelle e "
-             "colonne usate esistano nello schema, 3) che la query risponda "
-             "realmente alle informazioni fornite.\n\n"
-             "Se la query e' corretta sotto tutti questi aspetti, rispondi "
-             "ESATTAMENTE con la parola CORRETTA.\n"
-             "Altrimenti rispondi con 'DA_MIGLIORARE: ' seguito da una breve "
-             "spiegazione del problema riscontrato."),
+             "You are a module that verifies whether an SQL query correctly "
+             "addresses the information requested by the user, based on the "
+             "provided database schema. Check: 1) the SQL syntax, 2) that the "
+             "tables and columns used exist in the schema, and 3) that the "
+             "query actually addresses the requested information.\n\n"
+             "If the query is correct in all these respects, respond "
+             "EXACTLY with the word CORRETTA.\n"
+             "Otherwise, respond with 'DA_MIGLIORARE: ' followed by a brief "
+             "explanation of the issue found."),
             ("human",
-             "Schema del database:\n{schema}\n\n"
-             "Informazioni estratte dalla richiesta originale:\n{informazioni_estratte}\n\n"
-             "Query da valutare:\n{query}"),
+             "Database Schema:\n{schema}\n\n"
+             "Information extracted from the original request:\n{informazioni_estratte}\n\n"
+             "Query to be evaluated:\n{query}"),
         ]
     )
-
 
 def valuta_query(state: Agent2State) -> Agent2State:
     output_grezzo = CHAIN_VALUTAZIONE.invoke \
@@ -154,19 +151,18 @@ def get_prompt_miglioramento() -> ChatPromptTemplate:
     (
         [
             ("system",
-             "Sei un modulo che corregge una query SQL non ancora corretta, "
-             "sulla base del feedback ricevuto e dello schema del database. "
-             "Rispondi SOLO con la query SQL corretta, senza commenti, "
-             "spiegazioni o blocchi di codice markdown."),
+             "You are a module that corrects an incorrect SQL query, "
+             "based on the feedback received and the database schema. "
+             "Respond ONLY with the corrected SQL query, without comments, "
+             "explanations, or Markdown code blocks."),
             ("human",
-             "Schema del database:\n{schema}\n\n"
-             "Informazioni estratte dalla richiesta originale:\n{informazioni_estratte}\n\n"
-             "Query attuale:\n{query_corrente}\n\n"
-             "Problema riscontrato:\n{feedback}\n\n"
-             "Fornisci la query corretta."),
+             "Database Schema:\n{schema}\n\n"
+             "Information extracted from the original request:\n{informazioni_estratte}\n\n"
+             "Current query:\n{query_corrente}\n\n"
+             "Problem encountered:\n{feedback}\n\n"
+             "Provide the correct query."),
         ]
     )
-
 
 def migliora_query(state: Agent2State) -> Agent2State:
     output_grezzo = CHAIN_MIGLIORAMENTO.invoke \
@@ -210,7 +206,6 @@ def prepara_output_successo(state: Agent2State) -> Agent2State:
         "messaggio_errore": state["messaggio_errore"],
     }
 
-
 # Conditional routing after evaluation
 def route_dopo_valutazione(state: Agent2State) -> str:
     if state["valutazione"] == "CORRETTA":
@@ -218,7 +213,6 @@ def route_dopo_valutazione(state: Agent2State) -> str:
     if state["tentativi_miglioramento"] >= MAX_TENTATIVI_MIGLIORAMENTO:
         return "limite_raggiunto"
     return "da_migliorare"
-
 
 # LangGraph construction
 def costruisci_agente_2():
