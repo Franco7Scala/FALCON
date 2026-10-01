@@ -1,0 +1,9 @@
+torch
+langchain
+langgraph
+langchain-community
+langchain-huggingface
+pytest
+langchain-core
+transformers
+accelerate
