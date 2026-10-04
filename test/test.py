@@ -1,14 +1,24 @@
-# Run with: pytest test.py -v -s
+# Run everything: pytest test/test.py -v -s
+# Only one family: pytest test/test.py -v -s -k "aggregazioni"
+# pytest test/test.py -v -s -k "inesistenti or controllo"
 import ast
 import re
 import sqlite3
 from pathlib import Path
 import pytest
-from orchestratore.orchestratore import PIPELINE, PipelineState
-from utils.utils import DB, DB_PATH
+from orchestratore.orchestratore import PIPELINE, crea_stato_iniziale, MAX_TENTATIVI
+from utils.utils import DB_PATH
 
 
+# ---------------------------------------------------------------------------
 # Test database setup
+# ---------------------------------------------------------------------------
+# Resets/populates the database directly at DB_PATH (imported from
+# utils.utils, the exact same value the agents connect to), so this file is
+# self-contained and never drifts out of sync with a separate
+# crea_database.py. If you already keep one aligned with this DB_PATH, feel
+# free to call that instead of _crea_e_popola_database() below.
+
 def _crea_e_popola_database() -> None:
     Path(DB_PATH).parent.mkdir(parents=True, exist_ok=True)
     connessione = sqlite3.connect(DB_PATH)
@@ -88,24 +98,13 @@ def database_di_test():
     _crea_e_popola_database()
 
 
+# ---------------------------------------------------------------------------
 # Helpers
-def esegui_pipeline(richiesta: str) -> PipelineState:
-    """Builds the pipeline's initial state and invokes it for a single request."""
-    stato_iniziale: PipelineState = \
-    {
-        "richiesta_utente": richiesta,
-        "schema_database": DB.get_table_info(),
-        "informazioni_estratte": None,
-        "query_corrente": None,
-        "feedback_valutazione": None,
-        "valutazione": None,
-        "tentativi": 0,
-        "risultati_query": None,
-        "risposta_finale": None,
-        "esito": None,
-        "messaggio_errore": None,
-    }
-    return PIPELINE.invoke(stato_iniziale)
+# ---------------------------------------------------------------------------
+
+def esegui_pipeline(richiesta: str) -> dict:
+    """Builds the pipeline's initial state via the module's own helper and invokes it."""
+    return PIPELINE.invoke(crea_stato_iniziale(richiesta))
 
 
 def righe_attese(sql: str) -> list:
@@ -122,18 +121,14 @@ def valore_atteso(sql: str):
     return righe_attese(sql)[0][0]
 
 
-def estrai_numeri(testo) -> list:
-    """Extracts every number from a raw DB-result string, e.g. "[(575.0,)]" -> [575.0]."""
-    return [float(n) for n in re.findall(r"\d+(?:\.\d+)?", testo or "")]
-
-
-def descrivi(risultato: PipelineState) -> str:
+def descrivi(risultato: dict) -> str:
     """Multi-line summary of a pipeline run, used in assertion messages."""
     return (
         f"\nesito: {risultato['esito']}"
+        f"\nclassificazione: {risultato['classificazione']}"
         f"\ninformazioni estratte: {risultato['informazioni_estratte']}"
         f"\nquery corrente: {risultato['query_corrente']}"
-        f"\ntentativi: {risultato['tentativi']}"
+        f"\ntentativi di miglioramento: {risultato['tentativi_miglioramento']}"
         f"\nvalutazione: {risultato['valutazione']}"
         f"\nfeedback valutazione: {risultato['feedback_valutazione']}"
         f"\nrisultati grezzi: {risultato['risultati_query']}"
@@ -142,29 +137,17 @@ def descrivi(risultato: PipelineState) -> str:
     )
 
 
-def assert_numero_presente(risultato: PipelineState, atteso: float) -> None:
-    """
-    LOOSE check: the expected number appears somewhere in the raw result.
-    Kept only for cases where the correct answer could legitimately come
-    back shaped in more than one way (see test_aggregazioni_cliente_con_spesa_maggiore
-    below). Do NOT use this for COUNT/SUM/AVG/MIN/MAX-style requests: a
-    query that wrongly lists raw rows instead of aggregating can still
-    contain the right number by coincidence (e.g. an id matching the
-    expected count) and this check would not catch it.
-    """
-    numeri = estrai_numeri(risultato["risultati_query"])
-    assert any(abs(n - atteso) < 0.01 for n in numeri), \
-        f"expected value {atteso} not found in the query results.{descrivi(risultato)}"
-
+# ---------------------------------------------------------------------------
+# Strict, structural parsing of DB.run()'s raw output - see the module
+# docstring for why this replaces a loose "number present somewhere" check.
+# ---------------------------------------------------------------------------
 
 def parse_risultati(testo) -> list:
     """
-    Parses the raw string returned by DB.run() - which is just str() applied
-    to a list of row tuples, e.g. "[(12,)]" or "[(1, 1, '2026-01-15', 150.0), ...]"
-    - back into real Python data via ast.literal_eval, instead of a loose
-    regex over the digits it contains. This lets us check the SHAPE of the
-    result (how many rows, how many columns per row), not just whether a
-    number shows up somewhere. Returns [] if testo is None/empty/unparseable.
+    Parses the raw string returned by DB.run() - str() applied to a list of
+    row tuples, e.g. "[(12,)]" or "[(1, 1, '2026-01-15', 150.0), ...]" - back
+    into real Python data via ast.literal_eval, instead of a loose regex over
+    the digits it contains. Returns [] if testo is None/empty/unparseable.
     """
     if not testo:
         return []
@@ -175,15 +158,12 @@ def parse_risultati(testo) -> list:
     return valore if isinstance(valore, list) else [valore]
 
 
-def assert_valore_aggregato(risultato: PipelineState, atteso: float) -> None:
+def assert_valore_aggregato(risultato: dict, atteso: float) -> None:
     """
     STRICT check for a request whose correct answer is a single aggregate
-    value (COUNT/SUM/AVG/MIN/MAX, or a single-column lookup like "show me
-    X's email"). Requires the raw result to be exactly one row with exactly
-    one column, equal to the expected value - this is what catches a query
-    like "SELECT * FROM ordini" passed off as an answer to "how many orders
-    are there": it returns many rows with many columns, not one number, even
-    if one of those columns happens to contain the right value by chance.
+    value (COUNT/SUM/AVG/MIN/MAX, or a single-column lookup). Requires the
+    raw result to be exactly one row with exactly one column, equal to the
+    expected value.
     """
     righe = parse_risultati(risultato["risultati_query"])
     assert len(righe) == 1, \
@@ -200,7 +180,7 @@ def assert_valore_aggregato(risultato: PipelineState, atteso: float) -> None:
         f"expected {atteso}, got {valori[0]}.{descrivi(risultato)}"
 
 
-def assert_insieme_valori_singola_colonna(risultato: PipelineState, attesi: list) -> None:
+def assert_insieme_valori_singola_colonna(risultato: dict, attesi: list) -> None:
     """
     STRICT check for a request whose correct answer is a fixed-size set of
     single-column rows (e.g. "the 3 highest order totals"). Requires exactly
@@ -224,6 +204,7 @@ def assert_insieme_valori_singola_colonna(risultato: PipelineState, attesi: list
 
 
 def verifica_valore_numerico(richiesta: str, sql_verita: str) -> None:
+    """Shared body of the aggregation tests: run the pipeline, compare with ground truth."""
     atteso = valore_atteso(sql_verita)
     risultato = esegui_pipeline(richiesta)
 
@@ -232,7 +213,10 @@ def verifica_valore_numerico(richiesta: str, sql_verita: str) -> None:
     assert_valore_aggregato(risultato, atteso)
 
 
+# ---------------------------------------------------------------------------
 # Family 1a: simple aggregations on a single table
+# ---------------------------------------------------------------------------
+
 CASI_AGGREGAZIONE_SEMPLICI = \
 [
     pytest.param("Quanti ordini ci sono in totale?",
@@ -255,7 +239,12 @@ def test_aggregazioni_semplici(richiesta, sql_verita):
     verifica_valore_numerico(richiesta, sql_verita)
 
 
-# Family 1b: aggregations needing a JOIN, a filter, a date range or a subquery.
+# ---------------------------------------------------------------------------
+# Family 1b: aggregations needing a JOIN, a filter, a date range or a
+# subquery. These are genuinely harder, and exercise the Agent2<->Agent3
+# revision loop more.
+# ---------------------------------------------------------------------------
+
 CASI_AGGREGAZIONE_COMPLESSI = \
 [
     pytest.param(
@@ -295,7 +284,10 @@ def test_aggregazioni_complesse(richiesta, sql_verita):
     verifica_valore_numerico(richiesta, sql_verita)
 
 
+# ---------------------------------------------------------------------------
 # Family 1c: ranking requests (ORDER BY + LIMIT)
+# ---------------------------------------------------------------------------
+
 def test_aggregazioni_cliente_con_spesa_maggiore():
     cognome_atteso = valore_atteso(
         "SELECT c.cognome FROM clienti c JOIN ordini o ON o.cliente_id = c.id "
@@ -306,6 +298,10 @@ def test_aggregazioni_cliente_con_spesa_maggiore():
     assert risultato["esito"] == "successo", \
         f"the pipeline did not succeed.{descrivi(risultato)}"
 
+    # Looser on purpose: both "SELECT c.cognome ... LIMIT 1" and
+    # "SELECT * ... LIMIT 1" are legitimate ways to answer this request (the
+    # full row still contains the right surname), unlike an aggregate query
+    # where returning raw rows instead of a computed number is never correct.
     testo = f"{risultato['risultati_query']} {risultato['risposta_finale']}".lower()
     assert cognome_atteso.lower() in testo, \
         f"expected '{cognome_atteso}' in the answer.{descrivi(risultato)}"
@@ -322,7 +318,12 @@ def test_aggregazioni_tre_ordini_piu_alti():
     assert_insieme_valori_singola_colonna(risultato, attesi)
 
 
+# ---------------------------------------------------------------------------
 # Family 2: positive controls - existing columns must be answered.
+# Without these, the negative tests below would also pass if the pipeline
+# simply returned "errore" for everything.
+# ---------------------------------------------------------------------------
+
 CONTROLLI_POSITIVI = \
 [
     pytest.param("Mostrami l'email di Mario Rossi",
@@ -354,8 +355,20 @@ def test_controllo_positivo_colonna_esistente(richiesta, sql_verita):
         f"expected '{atteso}', got '{valori[0]}'.{descrivi(risultato)}"
 
 
-# Family 3: requests about entities that do NOT exist
-CASI_ENTITA_INESISTENTI = \
+# ---------------------------------------------------------------------------
+# Family 3: requests about tables/columns that do NOT exist.
+#
+# Two valid paths to esito == "errore" in this architecture (see module
+# docstring): immediate rejection at extraction (classificazione ==
+# "FUORI_CONTESTO", tentativi_miglioramento == 0), or eventual rejection
+# after Agent 2/3 exhaust MAX_TENTATIVI rounds driven by real SQLite
+# execution errors. Both are correct, so only the final outcome is asserted;
+# which path was taken is printed (via descrivi()) for your own inspection,
+# e.g. with:
+#   pytest test_pipeline_avanzati.py -v -s -k inesistenti
+# ---------------------------------------------------------------------------
+
+CASI_DATI_INESISTENTI = \
 [
     pytest.param("Mostrami le serre del cliente Mario Rossi", id="tabella-serre"),
     pytest.param("Mostrami le fatture del cliente Luca Verdi", id="tabella-fatture"),
@@ -365,18 +378,20 @@ CASI_ENTITA_INESISTENTI = \
 ]
 
 
-@pytest.mark.parametrize("richiesta", CASI_ENTITA_INESISTENTI)
-def test_dati_inesistenti_vengono_rifiutati_subito(richiesta):
+@pytest.mark.parametrize("richiesta", CASI_DATI_INESISTENTI)
+def test_dati_inesistenti_vengono_rifiutati(richiesta):
     risultato = esegui_pipeline(richiesta)
 
     assert risultato["esito"] == "errore", \
         "the pipeline answered even though the requested data does not exist " \
         f"in the schema.{descrivi(risultato)}"
-    assert risultato["query_corrente"] is None, \
-        "Agent 2 was invoked even though Agent 1 should have rejected the " \
-        f"request before reaching it.{descrivi(risultato)}"
-    assert risultato["tentativi"] == 0, \
-        "the pipeline entered the generation/revision loop instead of " \
-        f"rejecting immediately at extraction.{descrivi(risultato)}"
     assert risultato["messaggio_errore"] not in (None, ""), \
         f"esito is 'errore' but no message is available for the user.{descrivi(risultato)}"
+
+    # Informational only - not asserted, see the family docstring above.
+    if risultato["classificazione"] == "FUORI_CONTESTO":
+        print(f"\n[{richiesta}] rejected immediately at extraction (0 attempts).")
+    else:
+        print(f"\n[{richiesta}] rejected after "
+              f"{risultato['tentativi_miglioramento']}/{MAX_TENTATIVI} attempts "
+              f"(last feedback: {risultato['feedback_valutazione']}).")

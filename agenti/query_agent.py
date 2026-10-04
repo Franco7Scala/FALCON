@@ -5,7 +5,7 @@ from langchain_core.output_parsers import StrOutputParser
 from utils.utils import crea_llm
 
 # "Qwen/Qwen3-Coder-30B-A3B-Instruct"
-MODEL_NAME = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
+MODEL_NAME = "Qwen/Qwen3-Coder-30B-A3B-Instruct"
 
 
 # Utility: cleaning up the model output
@@ -107,7 +107,7 @@ def genera_query(
 
 
 # Initialization of model, prompts and chains
-LLM = crea_llm(MODEL_NAME)
+LLM = crea_llm(MODEL_NAME, carica_in_4bit=True)
 
 PROMPT_GENERAZIONE = get_prompt_generazione()
 CHAIN_GENERAZIONE = PROMPT_GENERAZIONE | LLM | StrOutputParser()
