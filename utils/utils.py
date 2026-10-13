@@ -57,5 +57,5 @@ def crea_llm(model_name: str, carica_in_4bit: bool = False) -> ChatHuggingFace:
     return ChatHuggingFace(llm=llm)
 
 
-DB_PATH = Path(__file__).resolve().parent.parent / "databases" / "negozio.db"
+DB_PATH = Path(__file__).resolve().parent.parent / "databases" / "container_logistics.sqlite"
 DB = SQLDatabase.from_uri(f"sqlite:///{DB_PATH}")

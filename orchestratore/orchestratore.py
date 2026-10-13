@@ -1,4 +1,4 @@
-# Pipeline
+# Orchestratore
 from typing import TypedDict, Optional
 from langgraph.graph import StateGraph, END
 from agenti.request_agent import estrai_informazioni
