@@ -105,6 +105,43 @@ def _riassumi_risultati(risultati: str) -> str:
     return f"{intestazione}\n{anteprima}"
 
 
+def _valore_booleano_sql(risultati: str):
+    """Return a bool only for a single-cell SQL result with a boolean value."""
+    if not risultati or not risultati.strip():
+        return None
+    try:
+        value = ast.literal_eval(risultati)
+    except (ValueError, SyntaxError, MemoryError, RecursionError):
+        value = risultati.strip()
+    if isinstance(value, dict):
+        if len(value) != 1:
+            return None
+        value = next(iter(value.values()))
+    if isinstance(value, (list, tuple)):
+        if len(value) != 1:
+            return None
+        value = value[0]
+        if isinstance(value, dict):
+            if len(value) != 1:
+                return None
+            value = next(iter(value.values()))
+        elif isinstance(value, (list, tuple)):
+            if len(value) != 1:
+                return None
+            value = value[0]
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value == 1 if value in (0, 1) else None
+    if isinstance(value, str):
+        normalized = value.strip().casefold()
+        if normalized in {"si", "sì", "yes", "true", "1"}:
+            return True
+        if normalized in {"no", "false", "0"}:
+            return False
+    return None
+
+
 def get_prompt_valutazione_risultati():
     return ChatPromptTemplate.from_messages([
         (
@@ -120,6 +157,13 @@ def get_prompt_valutazione_risultati():
             predicted activity seems intuitively plausible.
             
             For NEXT_ACTIVITY_PREDICTION tasks:
+
+            If the request identifies a specific case/object and asks for its
+            next event, verify the ordered prefix and position k+1 on that
+            object's trace. Do not require aggregation across other cases.
+            For a history-based prediction without a specified case/object,
+            verify that next activities are aggregated over matching traces
+            and the most frequent one is selected.
             
             1. Determine the complete ordered activity prefix from the
                original request.
@@ -130,8 +174,11 @@ def get_prompt_valutazione_risultati():
             3. Verify that the query retrieves the activity immediately
                following the complete prefix.
             
-            4. Verify that the query aggregates next activities across
+            4. For a history-based prediction without a specified case/object,
+               verify that the query aggregates next activities across
                matching training traces and selects the most frequent one.
+               For a specified case/object, verify that it filters to that
+               object's trace and does not aggregate other objects.
             
             5. The predicted next activity does NOT need to appear in the
                original request, because the purpose of the task is to predict
@@ -176,6 +223,15 @@ def get_prompt_valutazione_risultati():
             For requests other than next-activity prediction, check whether
             the query correctly applies the requested filters, columns,
             conditions, and aggregations.
+
+            For a structured TASK=BOOLEAN_QUERY, the SQL must return exactly
+            one row and one column with SI/NO or an equivalent boolean value.
+            Check that the SQL evaluates the complete proposition. A raw count,
+            list of matching records, multiple columns, or empty result does
+            not answer a yes/no request. For Italian quantities, interpret a
+            dot before groups of three digits as a thousands separator when
+            used with counts or units (e.g. 2.000 means 2000); keep decimal
+            fractions such as 0.5 unchanged.
             
             Return only the specified output format. Do not include Markdown
             or additional commentary.
@@ -199,7 +255,7 @@ def get_prompt_valutazione_risultati():
     ])
 
 
-def esegui_e_valuta(richiesta_utente: str, query: str) -> dict:
+def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] = None) -> dict:
     """
     Executes `query` against the shared database connection (utils.DB) and
     evaluates whether its results satisfy richiesta_utente.
@@ -223,6 +279,56 @@ def esegui_e_valuta(richiesta_utente: str, query: str) -> dict:
             "risposta_finale": None,
             "feedback": f"La query ha generato un errore di esecuzione sul database: {errore}",
         }
+
+    # Structured NSP queries are generated from the workbook's exact case,
+    # object type, and ordered prefix by the deterministic SQL template.
+    # Do not let the general-purpose judge turn an empty result into a valid
+    # prediction: a known case with no following event has no answer.
+    if (task_info or "").startswith("TASK=NEXT_ACTIVITY_PREDICTION"):
+        parsed = None
+        try:
+            parsed = ast.literal_eval(risultati) if risultati else []
+        except (ValueError, SyntaxError, MemoryError, RecursionError):
+            pass
+        no_answer = not risultati or not risultati.strip() or risultati.strip() in {"[]", "None"}
+        if isinstance(parsed, (list, tuple)):
+            no_answer = no_answer or not parsed
+            if parsed:
+                first = parsed[0]
+                value = first[0] if isinstance(first, (tuple, list)) and first else first
+                no_answer = no_answer or value is None or value == ""
+        if no_answer:
+            return {
+                "valutazione": "DA_RIGENERARE",
+                "risultati_query": risultati,
+                "risposta_finale": None,
+                "feedback": "The structured next-activity query returned no matching next event. Verify the case/object, complete prefix, and ordering.",
+            }
+        try:
+            first = parsed[0]
+            answer = first[0] if isinstance(first, (tuple, list)) else first
+        except (ValueError, SyntaxError, TypeError, IndexError):
+            answer = risultati
+        return {
+            "valutazione": "SODDISFATTA",
+            "risultati_query": risultati,
+            "risposta_finale": str(answer),
+            "feedback": None,
+        }
+
+    if (task_info or "").startswith("TASK=BOOLEAN_QUERY"):
+        boolean_value = _valore_booleano_sql(risultati)
+        if boolean_value is None:
+            return {
+                "valutazione": "DA_RIGENERARE",
+                "risultati_query": risultati,
+                "risposta_finale": None,
+                "feedback": (
+                    "This is a boolean task. Return exactly one row and one column "
+                    "containing SI/NO (or a single equivalent 1/0 or true/false). "
+                    "Do not return counts, record lists, multiple columns, or no rows."
+                ),
+            }
 
     output_grezzo = CHAIN_VALUTAZIONE.invoke(
         {

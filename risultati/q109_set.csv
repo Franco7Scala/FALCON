@@ -1,0 +1,6 @@
+ocel_id,ocel_type
+book_vehs_td1,Book Vehicles
+create_td1,Create Transport Document
+depart_vh1,Depart
+depart_vh4,Depart
+order_crs_td1,Order Empty Containers

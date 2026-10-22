@@ -1,0 +1,15 @@
+ocel_type,cnt
+Load Truck,10553
+Collect Goods,10553
+Pick Up Empty Container,1995
+Weigh,1989
+Drive to Terminal,1989
+Bring to Loading Bay,1969
+Load to Vehicle,1966
+Place in Stock,1814
+Register Customer Order,600
+Create Transport Document,594
+Book Vehicles,594
+Order Empty Containers,593
+Depart,127
+Reschedule Container,36

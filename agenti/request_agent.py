@@ -96,8 +96,13 @@ def get_prompt_estrazione() -> ChatPromptTemplate:
             - Preserve every activity exactly as provided.
             - Preserve the order of the activities.
             - Preserve repeated activities. Never deduplicate the prefix.
-            - Identify that the desired result is the most frequent activity
-              immediately following the complete prefix in matching training traces.
+            - Preserve an explicitly named case/object ID and Object Type, if present.
+            - If the request names a specific case/object and asks what happened
+              next in that case, the objective is the activity immediately after
+              the prefix in that object's trace; do not aggregate other objects.
+            - Only when no case/object is specified and the request asks for a
+              prediction from history, use the most frequent next activity across
+              traces matching the complete prefix.
             - Do not confuse the activities contained in the prefix with
               database table or column names.
 
@@ -106,8 +111,10 @@ def get_prompt_estrazione() -> ChatPromptTemplate:
             CLASSIFICAZIONE: IN_CONTESTO
             INFORMAZIONI: TASK=NEXT_ACTIVITY_PREDICTION;
             PREFIX=[activity_1, activity_2, ..., activity_k];
-            OBJECTIVE=Find the most frequent activity immediately following
-            the complete ordered prefix in matching traces.
+            CASE_ID=<explicit case/object id, or NONE>;
+            OBJECT_TYPE=<explicit object type, or NONE>;
+            OBJECTIVE=<case-specific next event, or most-frequent next activity
+            across matching traces, according to the request>.
 
             For other in-context requests, extract the relevant entities,
             filters, conditions, requested fields, and aggregation requirements.

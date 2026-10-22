@@ -1,0 +1,4276 @@
+{
+ "1": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    35372
+   ]
+  ]
+ },
+ "2": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM object;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    13882
+   ]
+  ]
+ },
+ "3": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_object;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    74272
+   ]
+  ]
+ },
+ "4": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM object_object;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    15920
+   ]
+  ]
+ },
+ "5": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT ocel_type) FROM event;",
+  "colonne": [
+   "COUNT(DISTINCT ocel_type)"
+  ],
+  "righe": [
+   [
+    14
+   ]
+  ]
+ },
+ "6": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT ocel_type) FROM object;",
+  "colonne": [
+   "COUNT(DISTINCT ocel_type)"
+  ],
+  "righe": [
+   [
+    7
+   ]
+  ]
+ },
+ "7": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM object WHERE ocel_type = 'Container';",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    1999
+   ]
+  ]
+ },
+ "8": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM object WHERE ocel_type = 'Customer Order';",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    600
+   ]
+  ]
+ },
+ "9": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM object WHERE ocel_type = 'Transport Document';",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    594
+   ]
+  ]
+ },
+ "10": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM object WHERE ocel_type = 'Handling Unit';",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    10553
+   ]
+  ]
+ },
+ "11": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM object WHERE ocel_type = 'Truck';",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    6
+   ]
+  ]
+ },
+ "12": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM object WHERE ocel_type = 'Vehicle';",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    127
+   ]
+  ]
+ },
+ "13": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM object WHERE ocel_type = 'Forklift';",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    3
+   ]
+  ]
+ },
+ "14": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_RegisterCustomerOrder;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    600
+   ]
+  ]
+ },
+ "15": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_CreateTransportDocument;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    594
+   ]
+  ]
+ },
+ "16": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_BookVehicles;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    594
+   ]
+  ]
+ },
+ "17": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_OrderEmptyContainers;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    593
+   ]
+  ]
+ },
+ "18": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_PickUpEmptyContainer;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    1995
+   ]
+  ]
+ },
+ "19": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_CollectGoods;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    10553
+   ]
+  ]
+ },
+ "20": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_LoadTruck;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    10553
+   ]
+  ]
+ },
+ "21": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_DrivetoTerminal;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    1989
+   ]
+  ]
+ },
+ "22": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_Weigh;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    1989
+   ]
+  ]
+ },
+ "23": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_PlaceinStock;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    1814
+   ]
+  ]
+ },
+ "24": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_BringtoLoadingBay;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    1969
+   ]
+  ]
+ },
+ "25": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_LoadtoVehicle;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    1966
+   ]
+  ]
+ },
+ "26": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_Depart;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    127
+   ]
+  ]
+ },
+ "27": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM event_RescheduleContainer;",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    36
+   ]
+  ]
+ },
+ "28": {
+  "tipo": "scalar",
+  "query": "SELECT COALESCE(SUM(AmountofHandlingUnits), 0) FROM object_Container WHERE AmountofHandlingUnits IS NOT NULL;",
+  "colonne": [
+   "COALESCE(SUM(AmountofHandlingUnits), 0)"
+  ],
+  "righe": [
+   [
+    10587.0
+   ]
+  ]
+ },
+ "29": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG(AmountofHandlingUnits), 2) FROM object_Container WHERE AmountofHandlingUnits IS NOT NULL;",
+  "colonne": [
+   "ROUND(AVG(AmountofHandlingUnits), 2)"
+  ],
+  "righe": [
+   [
+    5.3
+   ]
+  ]
+ },
+ "30": {
+  "tipo": "scalar",
+  "query": "SELECT MAX(AmountofHandlingUnits) FROM object_Container WHERE AmountofHandlingUnits IS NOT NULL;",
+  "colonne": [
+   "MAX(AmountofHandlingUnits)"
+  ],
+  "righe": [
+   [
+    6.0
+   ]
+  ]
+ },
+ "31": {
+  "tipo": "scalar",
+  "query": "SELECT MIN(AmountofHandlingUnits) FROM object_Container WHERE AmountofHandlingUnits IS NOT NULL;",
+  "colonne": [
+   "MIN(AmountofHandlingUnits)"
+  ],
+  "righe": [
+   [
+    1.0
+   ]
+  ]
+ },
+ "32": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG(Weight), 2) FROM object_Container WHERE Weight IS NOT NULL;",
+  "colonne": [
+   "ROUND(AVG(Weight), 2)"
+  ],
+  "righe": [
+   [
+    521.09
+   ]
+  ]
+ },
+ "33": {
+  "tipo": "scalar",
+  "query": "SELECT MAX(Weight) FROM object_Container WHERE Weight IS NOT NULL;",
+  "colonne": [
+   "MAX(Weight)"
+  ],
+  "righe": [
+   [
+    "null"
+   ]
+  ]
+ },
+ "34": {
+  "tipo": "scalar",
+  "query": "SELECT MIN(Weight) FROM object_Container WHERE Weight IS NOT NULL;",
+  "colonne": [
+   "MIN(Weight)"
+  ],
+  "righe": [
+   [
+    "1000.0"
+   ]
+  ]
+ },
+ "35": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG(AmountofGoods), 2) FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL;",
+  "colonne": [
+   "ROUND(AVG(AmountofGoods), 2)"
+  ],
+  "righe": [
+   [
+    902.08
+   ]
+  ]
+ },
+ "36": {
+  "tipo": "scalar",
+  "query": "SELECT MAX(AmountofGoods) FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL;",
+  "colonne": [
+   "MAX(AmountofGoods)"
+  ],
+  "righe": [
+   [
+    1500.0
+   ]
+  ]
+ },
+ "37": {
+  "tipo": "scalar",
+  "query": "SELECT MIN(AmountofGoods) FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL;",
+  "colonne": [
+   "MIN(AmountofGoods)"
+  ],
+  "righe": [
+   [
+    300.0
+   ]
+  ]
+ },
+ "38": {
+  "tipo": "scalar",
+  "query": "SELECT COALESCE(SUM(AmountofGoods), 0) FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL;",
+  "colonne": [
+   "COALESCE(SUM(AmountofGoods), 0)"
+  ],
+  "righe": [
+   [
+    541250.0
+   ]
+  ]
+ },
+ "39": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG(AmountofContainers), 2) FROM object_TransportDocument WHERE AmountofContainers IS NOT NULL;",
+  "colonne": [
+   "ROUND(AVG(AmountofContainers), 2)"
+  ],
+  "righe": [
+   [
+    3.41
+   ]
+  ]
+ },
+ "40": {
+  "tipo": "scalar",
+  "query": "SELECT MAX(AmountofContainers) FROM object_TransportDocument WHERE AmountofContainers IS NOT NULL;",
+  "colonne": [
+   "MAX(AmountofContainers)"
+  ],
+  "righe": [
+   [
+    5.0
+   ]
+  ]
+ },
+ "41": {
+  "tipo": "scalar",
+  "query": "SELECT MIN(AmountofContainers) FROM object_TransportDocument WHERE AmountofContainers IS NOT NULL;",
+  "colonne": [
+   "MIN(AmountofContainers)"
+  ],
+  "righe": [
+   [
+    1.0
+   ]
+  ]
+ },
+ "42": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT ocel_id) FROM object_Container WHERE Status IS NOT NULL;",
+  "colonne": [
+   "COUNT(DISTINCT ocel_id)"
+  ],
+  "righe": [
+   [
+    1999
+   ]
+  ]
+ },
+ "43": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT Status) FROM object_Container WHERE Status IS NOT NULL;",
+  "colonne": [
+   "COUNT(DISTINCT Status)"
+  ],
+  "righe": [
+   [
+    2
+   ]
+  ]
+ },
+ "44": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT ocel_id) FROM object_TransportDocument WHERE Status IS NOT NULL;",
+  "colonne": [
+   "COUNT(DISTINCT ocel_id)"
+  ],
+  "righe": [
+   [
+    594
+   ]
+  ]
+ },
+ "45": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT ocel_source_id) FROM object_object;",
+  "colonne": [
+   "COUNT(DISTINCT ocel_source_id)"
+  ],
+  "righe": [
+   [
+    3173
+   ]
+  ]
+ },
+ "46": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT ocel_target_id) FROM object_object;",
+  "colonne": [
+   "COUNT(DISTINCT ocel_target_id)"
+  ],
+  "righe": [
+   [
+    13271
+   ]
+  ]
+ },
+ "47": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM (SELECT ocel_object_id FROM event_object GROUP BY ocel_object_id HAVING COUNT(DISTINCT ocel_event_id) > 1);",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    13872
+   ]
+  ]
+ },
+ "48": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM (SELECT ocel_event_id FROM event_object GROUP BY ocel_event_id HAVING COUNT(DISTINCT ocel_object_id) > 1);",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    22202
+   ]
+  ]
+ },
+ "49": {
+  "tipo": "scalar",
+  "query": "SELECT COALESCE(MAX(n), 0) FROM (SELECT COUNT(DISTINCT ocel_object_id) AS n FROM event_object GROUP BY ocel_event_id);",
+  "colonne": [
+   "COALESCE(MAX(n), 0)"
+  ],
+  "righe": [
+   [
+    53
+   ]
+  ]
+ },
+ "50": {
+  "tipo": "scalar",
+  "query": "SELECT COALESCE(MAX(n), 0) FROM (SELECT COUNT(DISTINCT ocel_event_id) AS n FROM event_object GROUP BY ocel_object_id);",
+  "colonne": [
+   "COALESCE(MAX(n), 0)"
+  ],
+  "righe": [
+   [
+    2615
+   ]
+  ]
+ },
+ "51": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG(n), 2) FROM (SELECT COUNT(DISTINCT eo.ocel_event_id) AS n FROM event_object eo JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Container' GROUP BY eo.ocel_object_id);",
+  "colonne": [
+   "ROUND(AVG(n), 2)"
+  ],
+  "righe": [
+   [
+    13.14
+   ]
+  ]
+ },
+ "52": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG(n), 2) FROM (SELECT COUNT(DISTINCT eo.ocel_event_id) AS n FROM event_object eo JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Truck' GROUP BY eo.ocel_object_id);",
+  "colonne": [
+   "ROUND(AVG(n), 2)"
+  ],
+  "righe": [
+   [
+    2090.33
+   ]
+  ]
+ },
+ "53": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG(n), 2) FROM (SELECT COUNT(DISTINCT eo.ocel_event_id) AS n FROM event_object eo JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Forklift' GROUP BY eo.ocel_object_id);",
+  "colonne": [
+   "ROUND(AVG(n), 2)"
+  ],
+  "righe": [
+   [
+    2579.33
+   ]
+  ]
+ },
+ "54": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG(cnt), 2) FROM (SELECT oo.ocel_source_id, COUNT(DISTINCT oo.ocel_target_id) AS cnt FROM object_object oo JOIN object o1 ON o1.ocel_id = oo.ocel_source_id JOIN object o2 ON o2.ocel_id = oo.ocel_target_id WHERE o1.ocel_type = 'Customer Order' AND o2.ocel_type = 'Transport Document' GROUP BY oo.ocel_source_id);",
+  "colonne": [
+   "ROUND(AVG(cnt), 2)"
+  ],
+  "righe": [
+   [
+    1.0
+   ]
+  ]
+ },
+ "55": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2) FROM event_PickUpEmptyContainer e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_Weigh e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container';",
+  "colonne": [
+   "ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2)"
+  ],
+  "righe": [
+   [
+    20.81
+   ]
+  ]
+ },
+ "56": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2) FROM event_Weigh e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_PlaceinStock e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container';",
+  "colonne": [
+   "ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2)"
+  ],
+  "righe": [
+   [
+    0.54
+   ]
+  ]
+ },
+ "57": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2) FROM event_PlaceinStock e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_BringtoLoadingBay e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container';",
+  "colonne": [
+   "ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2)"
+  ],
+  "righe": [
+   [
+    206.49
+   ]
+  ]
+ },
+ "58": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2) FROM event_BringtoLoadingBay e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container';",
+  "colonne": [
+   "ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2)"
+  ],
+  "righe": [
+   [
+    1.58
+   ]
+  ]
+ },
+ "59": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2) FROM event_LoadTruck e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_DrivetoTerminal e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Handling Unit';",
+  "colonne": [
+   "ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2)"
+  ],
+  "righe": [
+   [
+    null
+   ]
+  ]
+ },
+ "60": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND((COUNT(DISTINCT er.ocel_object_id) * 100.0) / (SELECT COUNT(*) FROM object WHERE ocel_type = 'Container'), 2) FROM (SELECT eo.ocel_object_id FROM event_RescheduleContainer e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id) er;",
+  "colonne": [
+   "ROUND((COUNT(DISTINCT er.ocel_object_id) * 100.0) / (SELECT COUNT(*) FROM object WHERE ocel_type = 'Container'), 2)"
+  ],
+  "righe": [
+   [
+    4.3
+   ]
+  ]
+ },
+ "61": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) + 4.0, 2) FROM event_PickUpEmptyContainer e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container';",
+  "colonne": [
+   "ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) + 4.0, 2)"
+  ],
+  "righe": [
+   [
+    215.03
+   ]
+  ]
+ },
+ "62": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) * 0.75, 2) FROM event_PlaceinStock e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_BringtoLoadingBay e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container';",
+  "colonne": [
+   "ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) * 0.75, 2)"
+  ],
+  "righe": [
+   [
+    154.87
+   ]
+  ]
+ },
+ "63": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT eo1.ocel_object_id) FROM event_PlaceinStock e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_BringtoLoadingBay e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container' AND ((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 72.0;",
+  "colonne": [
+   "COUNT(DISTINCT eo1.ocel_object_id)"
+  ],
+  "righe": [
+   [
+    1429
+   ]
+  ]
+ },
+ "64": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT eo1.ocel_object_id) FROM event_BringtoLoadingBay e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container' AND (((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) + 3.0) > 12.0;",
+  "colonne": [
+   "COUNT(DISTINCT eo1.ocel_object_id)"
+  ],
+  "righe": [
+   [
+    58
+   ]
+  ]
+ },
+ "65": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT ocel_id) FROM object_Container WHERE Weight IS NOT NULL AND Weight > 25000.0;",
+  "colonne": [
+   "COUNT(DISTINCT ocel_id)"
+  ],
+  "righe": [
+   [
+    1999
+   ]
+  ]
+ },
+ "66": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT ocel_id) FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL AND AmountofGoods > 1200.0;",
+  "colonne": [
+   "COUNT(DISTINCT ocel_id)"
+  ],
+  "righe": [
+   [
+    146
+   ]
+  ]
+ },
+ "67": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT ocel_id) FROM object_TransportDocument WHERE AmountofContainers IS NOT NULL AND AmountofContainers > 4.0;",
+  "colonne": [
+   "COUNT(DISTINCT ocel_id)"
+  ],
+  "righe": [
+   [
+    145
+   ]
+  ]
+ },
+ "68": {
+  "tipo": "scalar",
+  "query": "SELECT ROUND(SUM(AmountofGoods) * 1.15, 2) FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL;",
+  "colonne": [
+   "ROUND(SUM(AmountofGoods) * 1.15, 2)"
+  ],
+  "righe": [
+   [
+    622437.5
+   ]
+  ]
+ },
+ "69": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(*) FROM (SELECT eo.ocel_object_id FROM event_LoadtoVehicle el JOIN event_object eo ON el.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Vehicle' GROUP BY eo.ocel_object_id HAVING COUNT(DISTINCT el.ocel_id) > 15);",
+  "colonne": [
+   "COUNT(*)"
+  ],
+  "righe": [
+   [
+    62
+   ]
+  ]
+ },
+ "70": {
+  "tipo": "scalar",
+  "query": "SELECT COUNT(DISTINCT eo_c.ocel_object_id) FROM event_Weigh ew JOIN event_object eo_c ON ew.ocel_id = eo_c.ocel_event_id JOIN object oc ON oc.ocel_id = eo_c.ocel_object_id AND oc.ocel_type = 'Container' JOIN event_object eo_lv ON oc.ocel_id = eo_lv.ocel_object_id JOIN event_LoadtoVehicle elv ON elv.ocel_id = eo_lv.ocel_event_id WHERE (strftime('%s', ew.ocel_time) + 24*3600) > strftime('%s', elv.ocel_time);",
+  "colonne": [
+   "COUNT(DISTINCT eo_c.ocel_object_id)"
+  ],
+  "righe": [
+   [
+    0
+   ]
+  ]
+ },
+ "71": {
+  "tipo": "set",
+  "query": "SELECT ocel_type, COUNT(*) AS cnt FROM event GROUP BY ocel_type ORDER BY cnt DESC;",
+  "colonne": [
+   "ocel_type",
+   "cnt"
+  ],
+  "righe": [
+   [
+    "Load Truck",
+    10553
+   ],
+   [
+    "Collect Goods",
+    10553
+   ],
+   [
+    "Pick Up Empty Container",
+    1995
+   ],
+   [
+    "Weigh",
+    1989
+   ],
+   [
+    "Drive to Terminal",
+    1989
+   ],
+   [
+    "Bring to Loading Bay",
+    1969
+   ],
+   [
+    "Load to Vehicle",
+    1966
+   ],
+   [
+    "Place in Stock",
+    1814
+   ],
+   [
+    "Register Customer Order",
+    600
+   ],
+   [
+    "Create Transport Document",
+    594
+   ],
+   [
+    "Book Vehicles",
+    594
+   ],
+   [
+    "Order Empty Containers",
+    593
+   ],
+   [
+    "Depart",
+    127
+   ],
+   [
+    "Reschedule Container",
+    36
+   ]
+  ]
+ },
+ "72": {
+  "tipo": "set",
+  "query": "SELECT ocel_type, COUNT(*) AS cnt FROM object GROUP BY ocel_type ORDER BY cnt DESC;",
+  "colonne": [
+   "ocel_type",
+   "cnt"
+  ],
+  "righe": [
+   [
+    "Handling Unit",
+    10553
+   ],
+   [
+    "Container",
+    1999
+   ],
+   [
+    "Customer Order",
+    600
+   ],
+   [
+    "Transport Document",
+    594
+   ],
+   [
+    "Vehicle",
+    127
+   ],
+   [
+    "Truck",
+    6
+   ],
+   [
+    "Forklift",
+    3
+   ]
+  ]
+ },
+ "73": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT ocel_id FROM object WHERE ocel_type = 'Truck' ORDER BY ocel_id;",
+  "colonne": [
+   "ocel_id"
+  ],
+  "righe": [
+   [
+    "tr1"
+   ],
+   [
+    "tr2"
+   ],
+   [
+    "tr3"
+   ],
+   [
+    "tr4"
+   ],
+   [
+    "tr5"
+   ],
+   [
+    "tr6"
+   ]
+  ]
+ },
+ "74": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT ocel_id FROM object WHERE ocel_type = 'Forklift' ORDER BY ocel_id;",
+  "colonne": [
+   "ocel_id"
+  ],
+  "righe": [
+   [
+    "fl1"
+   ],
+   [
+    "fl2"
+   ],
+   [
+    "fl3"
+   ]
+  ]
+ },
+ "75": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT Status FROM object_Container WHERE Status IS NOT NULL ORDER BY Status;",
+  "colonne": [
+   "Status"
+  ],
+  "righe": [
+   [
+    "empty"
+   ],
+   [
+    "full"
+   ]
+  ]
+ },
+ "76": {
+  "tipo": "set",
+  "query": "SELECT Status, COUNT(DISTINCT ocel_id) AS cnt FROM object_Container WHERE Status IS NOT NULL GROUP BY Status ORDER BY cnt DESC;",
+  "colonne": [
+   "Status",
+   "cnt"
+  ],
+  "righe": [
+   [
+    "empty",
+    1999
+   ],
+   [
+    "full",
+    1994
+   ]
+  ]
+ },
+ "77": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT Status FROM object_TransportDocument WHERE Status IS NOT NULL ORDER BY Status;",
+  "colonne": [
+   "Status"
+  ],
+  "righe": [
+   [
+    "in transit"
+   ],
+   [
+    "null"
+   ],
+   [
+    "shipped"
+   ]
+  ]
+ },
+ "78": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT ocel_qualifier FROM event_object WHERE ocel_qualifier IS NOT NULL ORDER BY ocel_qualifier;",
+  "colonne": [
+   "ocel_qualifier"
+  ],
+  "righe": [
+   [
+    "CR brought to bay"
+   ],
+   [
+    "CR departed"
+   ],
+   [
+    "CR laded"
+   ],
+   [
+    "CR loaded"
+   ],
+   [
+    "CR moved"
+   ],
+   [
+    "CR picked"
+   ],
+   [
+    "CR rescheduled"
+   ],
+   [
+    "CR stored"
+   ],
+   [
+    "CR weighted"
+   ],
+   [
+    "CRs ordered"
+   ],
+   [
+    "FL moved"
+   ],
+   [
+    "FL weighing"
+   ],
+   [
+    "HU collected"
+   ],
+   [
+    "HU loaded"
+   ],
+   [
+    "TD created for CO"
+   ],
+   [
+    "TD with CR departure"
+   ],
+   [
+    "TD with CR rescheduled"
+   ],
+   [
+    "TR laded"
+   ],
+   [
+    "TR moved"
+   ],
+   [
+    "VH departed"
+   ],
+   [
+    "VH laded"
+   ],
+   [
+    "VHs booked for TD"
+   ],
+   [
+    "booked VH"
+   ],
+   [
+    "booked VHs"
+   ],
+   [
+    "created TD"
+   ],
+   [
+    "ordered for TD"
+   ],
+   [
+    "registered CO"
+   ]
+  ]
+ },
+ "79": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT ocel_qualifier FROM object_object WHERE ocel_qualifier IS NOT NULL ORDER BY ocel_qualifier;",
+  "colonne": [
+   "ocel_qualifier"
+  ],
+  "righe": [
+   [
+    "CR contains HU"
+   ],
+   [
+    "CR for TD"
+   ],
+   [
+    "Ersatz VH for TD"
+   ],
+   [
+    "High-Prio VH for TD"
+   ],
+   [
+    "Regular VH for TD"
+   ],
+   [
+    "TD for CO"
+   ],
+   [
+    "TR loads CR"
+   ]
+  ]
+ },
+ "80": {
+  "tipo": "set",
+  "query": "SELECT ocel_qualifier, COUNT(*) AS cnt FROM object_object GROUP BY ocel_qualifier ORDER BY cnt DESC;",
+  "colonne": [
+   "ocel_qualifier",
+   "cnt"
+  ],
+  "righe": [
+   [
+    "CR contains HU",
+    10553
+   ],
+   [
+    "CR for TD",
+    1999
+   ],
+   [
+    "TR loads CR",
+    1997
+   ],
+   [
+    "TD for CO",
+    594
+   ],
+   [
+    "Regular VH for TD",
+    565
+   ],
+   [
+    "High-Prio VH for TD",
+    179
+   ],
+   [
+    "Ersatz VH for TD",
+    33
+   ]
+  ]
+ },
+ "81": {
+  "tipo": "set",
+  "query": "SELECT o.ocel_type, COUNT(*) AS cnt FROM event_object eo JOIN object o ON o.ocel_id = eo.ocel_object_id GROUP BY o.ocel_type ORDER BY cnt DESC;",
+  "colonne": [
+   "ocel_type",
+   "cnt"
+  ],
+  "righe": [
+   [
+    "Container",
+    26266
+   ],
+   [
+    "Handling Unit",
+    21106
+   ],
+   [
+    "Truck",
+    12542
+   ],
+   [
+    "Forklift",
+    7738
+   ],
+   [
+    "Vehicle",
+    2855
+   ],
+   [
+    "Transport Document",
+    2571
+   ],
+   [
+    "Customer Order",
+    1194
+   ]
+  ]
+ },
+ "82": {
+  "tipo": "set",
+  "query": "SELECT os.ocel_type AS source_type, ot.ocel_type AS target_type, COUNT(*) AS cnt FROM object_object oo JOIN object os ON os.ocel_id = oo.ocel_source_id JOIN object ot ON ot.ocel_id = oo.ocel_target_id GROUP BY os.ocel_type, ot.ocel_type ORDER BY cnt DESC;",
+  "colonne": [
+   "source_type",
+   "target_type",
+   "cnt"
+  ],
+  "righe": [
+   [
+    "Container",
+    "Handling Unit",
+    10553
+   ],
+   [
+    "Container",
+    "Transport Document",
+    1999
+   ],
+   [
+    "Truck",
+    "Container",
+    1997
+   ],
+   [
+    "Transport Document",
+    "Vehicle",
+    777
+   ],
+   [
+    "Customer Order",
+    "Transport Document",
+    594
+   ]
+  ]
+ },
+ "83": {
+  "tipo": "set",
+  "query": "SELECT eo.ocel_object_id, COUNT(DISTINCT eo.ocel_event_id) AS num_events FROM event_object eo JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Truck' GROUP BY eo.ocel_object_id ORDER BY num_events DESC;",
+  "colonne": [
+   "ocel_object_id",
+   "num_events"
+  ],
+  "righe": [
+   [
+    "tr6",
+    2140
+   ],
+   [
+    "tr5",
+    2120
+   ],
+   [
+    "tr3",
+    2091
+   ],
+   [
+    "tr1",
+    2079
+   ],
+   [
+    "tr4",
+    2074
+   ],
+   [
+    "tr2",
+    2038
+   ]
+  ]
+ },
+ "84": {
+  "tipo": "set",
+  "query": "SELECT eo.ocel_object_id, COUNT(DISTINCT eo.ocel_event_id) AS num_events FROM event_object eo JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Forklift' GROUP BY eo.ocel_object_id ORDER BY num_events DESC;",
+  "colonne": [
+   "ocel_object_id",
+   "num_events"
+  ],
+  "righe": [
+   [
+    "fl1",
+    2615
+   ],
+   [
+    "fl3",
+    2572
+   ],
+   [
+    "fl2",
+    2551
+   ]
+  ]
+ },
+ "85": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, ocel_time FROM event_RescheduleContainer ORDER BY ocel_time;",
+  "colonne": [
+   "ocel_id",
+   "ocel_time"
+  ],
+  "righe": [
+   [
+    "resch_cr_cr64",
+    "2023-06-13T13:58:38+00:00"
+   ],
+   [
+    "resch_cr_cr91",
+    "2023-06-14T13:54:50+00:00"
+   ],
+   [
+    "resch_cr_cr168",
+    "2023-07-06T08:23:09+00:00"
+   ],
+   [
+    "resch_cr_cr311",
+    "2023-08-08T10:03:13+00:00"
+   ],
+   [
+    "resch_cr_cr319",
+    "2023-08-08T11:12:26+00:00"
+   ],
+   [
+    "resch_cr_cr352",
+    "2023-08-11T13:57:38+00:00"
+   ],
+   [
+    "resch_cr_cr239",
+    "2023-08-11T14:16:43+00:00"
+   ],
+   [
+    "resch_cr_cr370",
+    "2023-08-21T05:17:16+00:00"
+   ],
+   [
+    "resch_cr_cr383",
+    "2023-08-22T06:45:27+00:00"
+   ],
+   [
+    "resch_cr_cr325",
+    "2023-08-23T06:58:55+00:00"
+   ],
+   [
+    "resch_cr_cr398",
+    "2023-08-24T12:48:27+00:00"
+   ],
+   [
+    "resch_cr_cr372",
+    "2023-08-28T12:12:19+00:00"
+   ],
+   [
+    "resch_cr_cr314",
+    "2023-08-29T11:18:24+00:00"
+   ],
+   [
+    "resch_cr_cr303",
+    "2023-08-29T15:10:19+00:00"
+   ],
+   [
+    "resch_cr_cr411",
+    "2023-08-30T07:57:29+00:00"
+   ],
+   [
+    "resch_cr_cr351",
+    "2023-08-30T09:07:32+00:00"
+   ],
+   [
+    "resch_cr_cr356",
+    "2023-08-31T07:58:21+00:00"
+   ],
+   [
+    "resch_cr_cr448",
+    "2023-09-01T13:38:23+00:00"
+   ],
+   [
+    "resch_cr_cr334",
+    "2023-09-04T11:43:36+00:00"
+   ],
+   [
+    "resch_cr_cr357",
+    "2023-09-05T09:21:44+00:00"
+   ],
+   [
+    "resch_cr_cr416",
+    "2023-09-05T11:12:22+00:00"
+   ],
+   [
+    "resch_cr_cr442",
+    "2023-09-06T08:47:10+00:00"
+   ],
+   [
+    "resch_cr_cr441",
+    "2023-09-06T09:08:14+00:00"
+   ],
+   [
+    "resch_cr_cr364",
+    "2023-09-06T09:11:57+00:00"
+   ],
+   [
+    "resch_cr_cr404",
+    "2023-09-06T12:59:06+00:00"
+   ],
+   [
+    "resch_cr_cr576",
+    "2023-09-26T12:07:30+00:00"
+   ],
+   [
+    "resch_cr_cr762",
+    "2023-11-07T10:30:40+00:00"
+   ],
+   [
+    "resch_cr_cr760",
+    "2023-11-07T14:57:27+00:00"
+   ],
+   [
+    "resch_cr_cr890",
+    "2023-12-05T12:06:30+00:00"
+   ],
+   [
+    "resch_cr_cr927",
+    "2023-12-12T10:56:28+00:00"
+   ],
+   [
+    "resch_cr_cr908",
+    "2023-12-12T15:41:03+00:00"
+   ],
+   [
+    "resch_cr_cr1759",
+    "2024-06-18T13:15:11+00:00"
+   ],
+   [
+    "resch_cr_cr1806",
+    "2024-07-16T13:57:40+00:00"
+   ],
+   [
+    "resch_cr_cr1801",
+    "2024-07-23T09:16:16+00:00"
+   ],
+   [
+    "resch_cr_cr1901",
+    "2024-07-23T09:30:58+00:00"
+   ],
+   [
+    "resch_cr_cr2000",
+    "2024-08-21T14:49:09+00:00"
+   ]
+  ]
+ },
+ "86": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT eo.ocel_object_id FROM event_RescheduleContainer er JOIN event_object eo ON er.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Container' ORDER BY eo.ocel_object_id;",
+  "colonne": [
+   "ocel_object_id"
+  ],
+  "righe": [
+   [
+    "cr168"
+   ],
+   [
+    "cr1759"
+   ],
+   [
+    "cr1801"
+   ],
+   [
+    "cr1806"
+   ],
+   [
+    "cr1901"
+   ],
+   [
+    "cr2000"
+   ],
+   [
+    "cr239"
+   ],
+   [
+    "cr303"
+   ],
+   [
+    "cr311"
+   ],
+   [
+    "cr314"
+   ],
+   [
+    "cr319"
+   ],
+   [
+    "cr325"
+   ],
+   [
+    "cr334"
+   ],
+   [
+    "cr351"
+   ],
+   [
+    "cr352"
+   ],
+   [
+    "cr356"
+   ],
+   [
+    "cr357"
+   ],
+   [
+    "cr364"
+   ],
+   [
+    "cr370"
+   ],
+   [
+    "cr372"
+   ],
+   [
+    "cr383"
+   ],
+   [
+    "cr398"
+   ],
+   [
+    "cr404"
+   ],
+   [
+    "cr411"
+   ],
+   [
+    "cr416"
+   ],
+   [
+    "cr441"
+   ],
+   [
+    "cr442"
+   ],
+   [
+    "cr448"
+   ],
+   [
+    "cr576"
+   ],
+   [
+    "cr64"
+   ],
+   [
+    "cr760"
+   ],
+   [
+    "cr762"
+   ],
+   [
+    "cr890"
+   ],
+   [
+    "cr908"
+   ],
+   [
+    "cr91"
+   ],
+   [
+    "cr927"
+   ]
+  ]
+ },
+ "87": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, MAX(AmountofGoods) AS max_goods FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL GROUP BY ocel_id ORDER BY max_goods DESC, ocel_id ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "max_goods"
+  ],
+  "righe": [
+   [
+    "co11",
+    1500.0
+   ],
+   [
+    "co20",
+    1500.0
+   ],
+   [
+    "co226",
+    1500.0
+   ],
+   [
+    "co252",
+    1500.0
+   ],
+   [
+    "co264",
+    1500.0
+   ],
+   [
+    "co28",
+    1500.0
+   ],
+   [
+    "co285",
+    1500.0
+   ],
+   [
+    "co291",
+    1500.0
+   ],
+   [
+    "co317",
+    1500.0
+   ],
+   [
+    "co38",
+    1500.0
+   ]
+  ]
+ },
+ "88": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, MIN(AmountofGoods) AS min_goods FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL GROUP BY ocel_id ORDER BY min_goods ASC, ocel_id ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "min_goods"
+  ],
+  "righe": [
+   [
+    "co158",
+    300.0
+   ],
+   [
+    "co18",
+    300.0
+   ],
+   [
+    "co181",
+    300.0
+   ],
+   [
+    "co201",
+    300.0
+   ],
+   [
+    "co232",
+    300.0
+   ],
+   [
+    "co319",
+    300.0
+   ],
+   [
+    "co332",
+    300.0
+   ],
+   [
+    "co352",
+    300.0
+   ],
+   [
+    "co373",
+    300.0
+   ],
+   [
+    "co391",
+    300.0
+   ]
+  ]
+ },
+ "89": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, MAX(Weight) AS max_weight FROM object_Container WHERE Weight IS NOT NULL GROUP BY ocel_id ORDER BY max_weight DESC, ocel_id ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "max_weight"
+  ],
+  "righe": [
+   [
+    "cr1",
+    "null"
+   ],
+   [
+    "cr10",
+    "null"
+   ],
+   [
+    "cr100",
+    "null"
+   ],
+   [
+    "cr1000",
+    "null"
+   ],
+   [
+    "cr1001",
+    "null"
+   ],
+   [
+    "cr1002",
+    "null"
+   ],
+   [
+    "cr1003",
+    "null"
+   ],
+   [
+    "cr1004",
+    "null"
+   ],
+   [
+    "cr1005",
+    "null"
+   ],
+   [
+    "cr1006",
+    "null"
+   ]
+  ]
+ },
+ "90": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, MIN(Weight) AS min_weight FROM object_Container WHERE Weight IS NOT NULL GROUP BY ocel_id ORDER BY min_weight ASC, ocel_id ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "min_weight"
+  ],
+  "righe": [
+   [
+    "cr1273",
+    "1000.0"
+   ],
+   [
+    "cr489",
+    "1000.0"
+   ],
+   [
+    "cr978",
+    "1000.0"
+   ],
+   [
+    "cr1064",
+    "1010.0"
+   ],
+   [
+    "cr1146",
+    "1010.0"
+   ],
+   [
+    "cr1476",
+    "1010.0"
+   ],
+   [
+    "cr1483",
+    "1010.0"
+   ],
+   [
+    "cr1508",
+    "1010.0"
+   ],
+   [
+    "cr1897",
+    "1010.0"
+   ],
+   [
+    "cr1998",
+    "1010.0"
+   ]
+  ]
+ },
+ "91": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, MAX(AmountofHandlingUnits) AS max_hu FROM object_Container WHERE AmountofHandlingUnits IS NOT NULL GROUP BY ocel_id ORDER BY max_hu DESC, ocel_id ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "max_hu"
+  ],
+  "righe": [
+   [
+    "cr1",
+    6.0
+   ],
+   [
+    "cr10",
+    6.0
+   ],
+   [
+    "cr100",
+    6.0
+   ],
+   [
+    "cr1001",
+    6.0
+   ],
+   [
+    "cr1002",
+    6.0
+   ],
+   [
+    "cr1003",
+    6.0
+   ],
+   [
+    "cr1004",
+    6.0
+   ],
+   [
+    "cr1005",
+    6.0
+   ],
+   [
+    "cr1006",
+    6.0
+   ],
+   [
+    "cr1007",
+    6.0
+   ]
+  ]
+ },
+ "92": {
+  "tipo": "set",
+  "query": "SELECT AmountofHandlingUnits, COUNT(DISTINCT ocel_id) AS cnt FROM object_Container WHERE AmountofHandlingUnits IS NOT NULL GROUP BY AmountofHandlingUnits ORDER BY AmountofHandlingUnits ASC;",
+  "colonne": [
+   "AmountofHandlingUnits",
+   "cnt"
+  ],
+  "righe": [
+   [
+    1.0,
+    97
+   ],
+   [
+    2.0,
+    91
+   ],
+   [
+    3.0,
+    97
+   ],
+   [
+    4.0,
+    87
+   ],
+   [
+    5.0,
+    93
+   ],
+   [
+    6.0,
+    1534
+   ]
+  ]
+ },
+ "93": {
+  "tipo": "set",
+  "query": "SELECT AmountofContainers, COUNT(DISTINCT ocel_id) AS cnt FROM object_TransportDocument WHERE AmountofContainers IS NOT NULL GROUP BY AmountofContainers ORDER BY AmountofContainers ASC;",
+  "colonne": [
+   "AmountofContainers",
+   "cnt"
+  ],
+  "righe": [
+   [
+    1.0,
+    22
+   ],
+   [
+    2.0,
+    136
+   ],
+   [
+    3.0,
+    157
+   ],
+   [
+    4.0,
+    134
+   ],
+   [
+    5.0,
+    145
+   ]
+  ]
+ },
+ "94": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, DepartureDate FROM object_Vehicle WHERE DepartureDate IS NOT NULL ORDER BY DepartureDate ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "DepartureDate"
+  ],
+  "righe": [
+   [
+    "vh1",
+    "2023-05-30 11:00:00"
+   ],
+   [
+    "vh2",
+    "2023-06-02 11:00:00"
+   ],
+   [
+    "vh3",
+    "2023-06-06 11:00:00"
+   ],
+   [
+    "vh4",
+    "2023-06-09 11:00:00"
+   ],
+   [
+    "vh5",
+    "2023-06-13 11:00:00"
+   ],
+   [
+    "vh6",
+    "2023-06-16 11:00:00"
+   ],
+   [
+    "vh7",
+    "2023-06-20 11:00:00"
+   ],
+   [
+    "vh8",
+    "2023-06-23 11:00:00"
+   ],
+   [
+    "vh9",
+    "2023-06-27 11:00:00"
+   ],
+   [
+    "vh10",
+    "2023-06-30 11:00:00"
+   ]
+  ]
+ },
+ "95": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, DepartureDate FROM object_Vehicle WHERE DepartureDate IS NOT NULL ORDER BY DepartureDate DESC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "DepartureDate"
+  ],
+  "righe": [
+   [
+    "vh129",
+    "2024-08-20 11:00:00"
+   ],
+   [
+    "vh128",
+    "2024-08-16 11:00:00"
+   ],
+   [
+    "vh127",
+    "2024-08-13 11:00:00"
+   ],
+   [
+    "vh126",
+    "2024-08-09 11:00:00"
+   ],
+   [
+    "vh125",
+    "2024-08-06 11:00:00"
+   ],
+   [
+    "vh124",
+    "2024-08-02 11:00:00"
+   ],
+   [
+    "vh123",
+    "2024-07-30 11:00:00"
+   ],
+   [
+    "vh122",
+    "2024-07-26 11:00:00"
+   ],
+   [
+    "vh121",
+    "2024-07-23 11:00:00"
+   ],
+   [
+    "vh120",
+    "2024-07-19 11:00:00"
+   ]
+  ]
+ },
+ "96": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, ocel_time FROM event_Depart ORDER BY ocel_time ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "ocel_time"
+  ],
+  "righe": [
+   [
+    "depart_vh1",
+    "2023-05-30T09:00:00+00:00"
+   ],
+   [
+    "depart_vh2",
+    "2023-06-02T09:00:00+00:00"
+   ],
+   [
+    "depart_vh3",
+    "2023-06-06T09:00:00+00:00"
+   ],
+   [
+    "depart_vh4",
+    "2023-06-09T09:00:00+00:00"
+   ],
+   [
+    "depart_vh5",
+    "2023-06-13T09:00:00+00:00"
+   ],
+   [
+    "depart_vh6",
+    "2023-06-16T09:00:00+00:00"
+   ],
+   [
+    "depart_vh7",
+    "2023-06-20T09:00:00+00:00"
+   ],
+   [
+    "depart_vh8",
+    "2023-06-23T09:00:00+00:00"
+   ],
+   [
+    "depart_vh9",
+    "2023-06-27T09:00:00+00:00"
+   ],
+   [
+    "depart_vh10",
+    "2023-06-30T09:00:00+00:00"
+   ]
+  ]
+ },
+ "97": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, ocel_time FROM event_Depart ORDER BY ocel_time DESC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "ocel_time"
+  ],
+  "righe": [
+   [
+    "depart_vh129",
+    "2024-08-20T09:00:00+00:00"
+   ],
+   [
+    "depart_vh128",
+    "2024-08-16T09:00:00+00:00"
+   ],
+   [
+    "depart_vh127",
+    "2024-08-13T09:00:00+00:00"
+   ],
+   [
+    "depart_vh126",
+    "2024-08-09T09:00:00+00:00"
+   ],
+   [
+    "depart_vh125",
+    "2024-08-06T09:00:00+00:00"
+   ],
+   [
+    "depart_vh124",
+    "2024-08-02T09:00:00+00:00"
+   ],
+   [
+    "depart_vh123",
+    "2024-07-30T09:00:00+00:00"
+   ],
+   [
+    "depart_vh122",
+    "2024-07-26T09:00:00+00:00"
+   ],
+   [
+    "depart_vh121",
+    "2024-07-23T09:00:00+00:00"
+   ],
+   [
+    "depart_vh120",
+    "2024-07-19T09:00:00+00:00"
+   ]
+  ]
+ },
+ "98": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, ocel_time FROM event_RegisterCustomerOrder ORDER BY ocel_time ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "ocel_time"
+  ],
+  "righe": [
+   [
+    "reg_co1",
+    "2023-05-22T11:54:42+00:00"
+   ],
+   [
+    "reg_co2",
+    "2023-05-22T18:33:30+00:00"
+   ],
+   [
+    "reg_co3",
+    "2023-05-23T12:14:57+00:00"
+   ],
+   [
+    "reg_co4",
+    "2023-05-23T18:34:15+00:00"
+   ],
+   [
+    "reg_co5",
+    "2023-05-24T12:16:04+00:00"
+   ],
+   [
+    "reg_co6",
+    "2023-05-24T18:37:36+00:00"
+   ],
+   [
+    "reg_co7",
+    "2023-05-25T12:21:06+00:00"
+   ],
+   [
+    "reg_co8",
+    "2023-05-25T18:52:42+00:00"
+   ],
+   [
+    "reg_co9",
+    "2023-05-26T15:01:20+00:00"
+   ],
+   [
+    "reg_co10",
+    "2023-05-29T09:50:58+00:00"
+   ]
+  ]
+ },
+ "99": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, ocel_time FROM event_BookVehicles ORDER BY ocel_time ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "ocel_time"
+  ],
+  "righe": [
+   [
+    "book_vehs_td1",
+    "2023-05-23T10:05:16+00:00"
+   ],
+   [
+    "book_vehs_td2",
+    "2023-05-25T15:29:35+00:00"
+   ],
+   [
+    "book_vehs_td3",
+    "2023-05-26T09:53:25+00:00"
+   ],
+   [
+    "book_vehs_td4",
+    "2023-05-26T12:00:47+00:00"
+   ],
+   [
+    "book_vehs_td5",
+    "2023-05-26T16:36:27+00:00"
+   ],
+   [
+    "book_vehs_td6",
+    "2023-05-29T06:10:43+00:00"
+   ],
+   [
+    "book_vehs_td7",
+    "2023-05-29T14:23:43+00:00"
+   ],
+   [
+    "book_vehs_td9",
+    "2023-05-29T14:27:06+00:00"
+   ],
+   [
+    "book_vehs_td8",
+    "2023-05-30T05:46:23+00:00"
+   ],
+   [
+    "book_vehs_td10",
+    "2023-05-30T09:49:14+00:00"
+   ]
+  ]
+ },
+ "100": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, ocel_time FROM event_CreateTransportDocument ORDER BY ocel_time ASC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "ocel_time"
+  ],
+  "righe": [
+   [
+    "create_td1",
+    "2023-05-23T08:22:17+00:00"
+   ],
+   [
+    "create_td2",
+    "2023-05-25T13:59:21+00:00"
+   ],
+   [
+    "create_td3",
+    "2023-05-26T09:36:47+00:00"
+   ],
+   [
+    "create_td4",
+    "2023-05-26T09:41:01+00:00"
+   ],
+   [
+    "create_td5",
+    "2023-05-26T12:48:31+00:00"
+   ],
+   [
+    "create_td6",
+    "2023-05-26T14:54:26+00:00"
+   ],
+   [
+    "create_td7",
+    "2023-05-29T11:53:07+00:00"
+   ],
+   [
+    "create_td8",
+    "2023-05-29T14:01:39+00:00"
+   ],
+   [
+    "create_td9",
+    "2023-05-29T14:18:08+00:00"
+   ],
+   [
+    "create_td10",
+    "2023-05-30T08:39:18+00:00"
+   ]
+  ]
+ },
+ "101": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT o.ocel_type FROM event_LoadTruck e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id ORDER BY o.ocel_type;",
+  "colonne": [
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "Container"
+   ],
+   [
+    "Handling Unit"
+   ],
+   [
+    "Truck"
+   ]
+  ]
+ },
+ "102": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT o.ocel_type FROM event_LoadtoVehicle e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id ORDER BY o.ocel_type;",
+  "colonne": [
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "Container"
+   ],
+   [
+    "Forklift"
+   ],
+   [
+    "Vehicle"
+   ]
+  ]
+ },
+ "103": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT o.ocel_type FROM event_PlaceinStock e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id ORDER BY o.ocel_type;",
+  "colonne": [
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "Container"
+   ],
+   [
+    "Forklift"
+   ]
+  ]
+ },
+ "104": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT o.ocel_type FROM event_BringtoLoadingBay e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id ORDER BY o.ocel_type;",
+  "colonne": [
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "Container"
+   ],
+   [
+    "Forklift"
+   ]
+  ]
+ },
+ "105": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT o.ocel_type FROM event_Depart e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id ORDER BY o.ocel_type;",
+  "colonne": [
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "Container"
+   ],
+   [
+    "Transport Document"
+   ],
+   [
+    "Vehicle"
+   ]
+  ]
+ },
+ "106": {
+  "tipo": "set",
+  "query": "SELECT e.ocel_id, e.ocel_type FROM event e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id WHERE eo.ocel_object_id = 'cr1' ORDER BY e.ocel_id;",
+  "colonne": [
+   "ocel_id",
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "depart_vh4",
+    "Depart"
+   ],
+   [
+    "drive_term_cr1",
+    "Drive to Terminal"
+   ],
+   [
+    "load_truck_hu59",
+    "Load Truck"
+   ],
+   [
+    "load_truck_hu60",
+    "Load Truck"
+   ],
+   [
+    "load_truck_hu61",
+    "Load Truck"
+   ],
+   [
+    "load_truck_hu62",
+    "Load Truck"
+   ],
+   [
+    "load_truck_hu63",
+    "Load Truck"
+   ],
+   [
+    "load_truck_hu64",
+    "Load Truck"
+   ],
+   [
+    "load_veh_cr1",
+    "Load to Vehicle"
+   ],
+   [
+    "order_crs_td1",
+    "Order Empty Containers"
+   ],
+   [
+    "pick_cr1",
+    "Pick Up Empty Container"
+   ],
+   [
+    "stock_cr1",
+    "Place in Stock"
+   ],
+   [
+    "to_bay_cr1",
+    "Bring to Loading Bay"
+   ],
+   [
+    "weigh_cr1",
+    "Weigh"
+   ]
+  ]
+ },
+ "107": {
+  "tipo": "set",
+  "query": "SELECT e.ocel_id, e.ocel_type FROM event e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id WHERE eo.ocel_object_id = 'co1' ORDER BY e.ocel_id;",
+  "colonne": [
+   "ocel_id",
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "create_td6",
+    "Create Transport Document"
+   ],
+   [
+    "reg_co1",
+    "Register Customer Order"
+   ]
+  ]
+ },
+ "108": {
+  "tipo": "set",
+  "query": "SELECT e.ocel_id, e.ocel_type FROM event e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id WHERE eo.ocel_object_id = 'vh1' ORDER BY e.ocel_id;",
+  "colonne": [
+   "ocel_id",
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "book_vehs_td1",
+    "Book Vehicles"
+   ],
+   [
+    "book_vehs_td4",
+    "Book Vehicles"
+   ],
+   [
+    "depart_vh1",
+    "Depart"
+   ],
+   [
+    "load_veh_cr16",
+    "Load to Vehicle"
+   ],
+   [
+    "load_veh_cr2",
+    "Load to Vehicle"
+   ],
+   [
+    "load_veh_cr3",
+    "Load to Vehicle"
+   ]
+  ]
+ },
+ "109": {
+  "tipo": "set",
+  "query": "SELECT e.ocel_id, e.ocel_type FROM event e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id WHERE eo.ocel_object_id = 'td1' ORDER BY e.ocel_id;",
+  "colonne": [
+   "ocel_id",
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "book_vehs_td1",
+    "Book Vehicles"
+   ],
+   [
+    "create_td1",
+    "Create Transport Document"
+   ],
+   [
+    "depart_vh1",
+    "Depart"
+   ],
+   [
+    "depart_vh4",
+    "Depart"
+   ],
+   [
+    "order_crs_td1",
+    "Order Empty Containers"
+   ]
+  ]
+ },
+ "110": {
+  "tipo": "set",
+  "query": "SELECT oo.ocel_target_id, o.ocel_type, oo.ocel_qualifier FROM object_object oo JOIN object o ON o.ocel_id = oo.ocel_target_id WHERE oo.ocel_source_id = 'co1' ORDER BY oo.ocel_target_id;",
+  "colonne": [
+   "ocel_target_id",
+   "ocel_type",
+   "ocel_qualifier"
+  ],
+  "righe": [
+   [
+    "td6",
+    "Transport Document",
+    "TD for CO"
+   ]
+  ]
+ },
+ "111": {
+  "tipo": "set",
+  "query": "SELECT oo.ocel_target_id, o.ocel_type, oo.ocel_qualifier FROM object_object oo JOIN object o ON o.ocel_id = oo.ocel_target_id WHERE oo.ocel_source_id = 'td1' ORDER BY oo.ocel_target_id;",
+  "colonne": [
+   "ocel_target_id",
+   "ocel_type",
+   "ocel_qualifier"
+  ],
+  "righe": [
+   [
+    "vh1",
+    "Vehicle",
+    "High-Prio VH for TD"
+   ],
+   [
+    "vh4",
+    "Vehicle",
+    "Regular VH for TD"
+   ]
+  ]
+ },
+ "112": {
+  "tipo": "set",
+  "query": "SELECT oo.ocel_target_id, o.ocel_type, oo.ocel_qualifier FROM object_object oo JOIN object o ON o.ocel_id = oo.ocel_target_id WHERE oo.ocel_source_id = 'cr1' ORDER BY oo.ocel_target_id;",
+  "colonne": [
+   "ocel_target_id",
+   "ocel_type",
+   "ocel_qualifier"
+  ],
+  "righe": [
+   [
+    "hu59",
+    "Handling Unit",
+    "CR contains HU"
+   ],
+   [
+    "hu60",
+    "Handling Unit",
+    "CR contains HU"
+   ],
+   [
+    "hu61",
+    "Handling Unit",
+    "CR contains HU"
+   ],
+   [
+    "hu62",
+    "Handling Unit",
+    "CR contains HU"
+   ],
+   [
+    "hu63",
+    "Handling Unit",
+    "CR contains HU"
+   ],
+   [
+    "hu64",
+    "Handling Unit",
+    "CR contains HU"
+   ],
+   [
+    "td1",
+    "Transport Document",
+    "CR for TD"
+   ]
+  ]
+ },
+ "113": {
+  "tipo": "set",
+  "query": "SELECT eo.ocel_event_id, COUNT(DISTINCT eo.ocel_object_id) AS obj_cnt FROM event_object eo GROUP BY eo.ocel_event_id ORDER BY obj_cnt DESC, eo.ocel_event_id ASC LIMIT 10;",
+  "colonne": [
+   "ocel_event_id",
+   "obj_cnt"
+  ],
+  "righe": [
+   [
+    "depart_vh56",
+    53
+   ],
+   [
+    "depart_vh30",
+    46
+   ],
+   [
+    "depart_vh48",
+    44
+   ],
+   [
+    "depart_vh111",
+    43
+   ],
+   [
+    "depart_vh70",
+    43
+   ],
+   [
+    "depart_vh84",
+    42
+   ],
+   [
+    "depart_vh39",
+    39
+   ],
+   [
+    "depart_vh100",
+    38
+   ],
+   [
+    "depart_vh6",
+    38
+   ],
+   [
+    "depart_vh10",
+    37
+   ]
+  ]
+ },
+ "114": {
+  "tipo": "set",
+  "query": "SELECT eo.ocel_object_id, o.ocel_type, COUNT(DISTINCT eo.ocel_event_id) AS ev_cnt FROM event_object eo JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Container' GROUP BY eo.ocel_object_id ORDER BY ev_cnt DESC, eo.ocel_object_id ASC LIMIT 10;",
+  "colonne": [
+   "ocel_object_id",
+   "ocel_type",
+   "ev_cnt"
+  ],
+  "righe": [
+   [
+    "cr1",
+    "Container",
+    14
+   ],
+   [
+    "cr10",
+    "Container",
+    14
+   ],
+   [
+    "cr100",
+    "Container",
+    14
+   ],
+   [
+    "cr1001",
+    "Container",
+    14
+   ],
+   [
+    "cr1003",
+    "Container",
+    14
+   ],
+   [
+    "cr1004",
+    "Container",
+    14
+   ],
+   [
+    "cr1005",
+    "Container",
+    14
+   ],
+   [
+    "cr1007",
+    "Container",
+    14
+   ],
+   [
+    "cr1009",
+    "Container",
+    14
+   ],
+   [
+    "cr1010",
+    "Container",
+    14
+   ]
+  ]
+ },
+ "115": {
+  "tipo": "set",
+  "query": "SELECT eo.ocel_object_id, COUNT(DISTINCT eo.ocel_event_id) AS ev_cnt FROM event_object eo JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Vehicle' GROUP BY eo.ocel_object_id ORDER BY ev_cnt DESC, eo.ocel_object_id ASC LIMIT 10;",
+  "colonne": [
+   "ocel_object_id",
+   "ev_cnt"
+  ],
+  "righe": [
+   [
+    "vh56",
+    53
+   ],
+   [
+    "vh30",
+    47
+   ],
+   [
+    "vh48",
+    45
+   ],
+   [
+    "vh111",
+    43
+   ],
+   [
+    "vh70",
+    43
+   ],
+   [
+    "vh84",
+    42
+   ],
+   [
+    "vh39",
+    39
+   ],
+   [
+    "vh100",
+    38
+   ],
+   [
+    "vh6",
+    38
+   ],
+   [
+    "vh10",
+    37
+   ]
+  ]
+ },
+ "116": {
+  "tipo": "set",
+  "query": "SELECT oo.ocel_source_id, COUNT(DISTINCT oo.ocel_target_id) AS target_cnt FROM object_object oo JOIN object o ON o.ocel_id = oo.ocel_source_id WHERE o.ocel_type = 'Customer Order' GROUP BY oo.ocel_source_id ORDER BY target_cnt DESC, oo.ocel_source_id ASC LIMIT 10;",
+  "colonne": [
+   "ocel_source_id",
+   "target_cnt"
+  ],
+  "righe": [
+   [
+    "co1",
+    1
+   ],
+   [
+    "co10",
+    1
+   ],
+   [
+    "co100",
+    1
+   ],
+   [
+    "co101",
+    1
+   ],
+   [
+    "co102",
+    1
+   ],
+   [
+    "co103",
+    1
+   ],
+   [
+    "co104",
+    1
+   ],
+   [
+    "co105",
+    1
+   ],
+   [
+    "co106",
+    1
+   ],
+   [
+    "co107",
+    1
+   ]
+  ]
+ },
+ "117": {
+  "tipo": "set",
+  "query": "SELECT eo1.ocel_object_id, ROUND((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0, 2) AS wait_hours FROM event_BringtoLoadingBay e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container' ORDER BY wait_hours DESC LIMIT 5;",
+  "colonne": [
+   "ocel_object_id",
+   "wait_hours"
+  ],
+  "righe": [
+   [
+    "cr1901",
+    140.42
+   ],
+   [
+    "cr370",
+    132.61
+   ],
+   [
+    "cr356",
+    95.82
+   ],
+   [
+    "cr168",
+    93.34
+   ],
+   [
+    "cr398",
+    88.99
+   ]
+  ]
+ },
+ "118": {
+  "tipo": "set",
+  "query": "SELECT eo1.ocel_object_id, ROUND((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0, 2) AS stock_hours FROM event_PlaceinStock e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_BringtoLoadingBay e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container' ORDER BY stock_hours DESC LIMIT 5;",
+  "colonne": [
+   "ocel_object_id",
+   "stock_hours"
+  ],
+  "righe": [
+   [
+    "cr1850",
+    624.53
+   ],
+   [
+    "cr1127",
+    593.71
+   ],
+   [
+    "cr248",
+    582.68
+   ],
+   [
+    "cr1068",
+    575.49
+   ],
+   [
+    "cr675",
+    572.29
+   ]
+  ]
+ },
+ "119": {
+  "tipo": "set",
+  "query": "SELECT eo1.ocel_object_id, ROUND((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0, 2) AS weigh_hours FROM event_PickUpEmptyContainer e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_Weigh e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container' ORDER BY weigh_hours DESC LIMIT 5;",
+  "colonne": [
+   "ocel_object_id",
+   "weigh_hours"
+  ],
+  "righe": [
+   [
+    "cr324",
+    116.63
+   ],
+   [
+    "cr323",
+    96.98
+   ],
+   [
+    "cr353",
+    91.72
+   ],
+   [
+    "cr371",
+    91.36
+   ],
+   [
+    "cr372",
+    91.36
+   ]
+  ]
+ },
+ "120": {
+  "tipo": "set",
+  "query": "SELECT eo1.ocel_object_id, ROUND((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0, 2) AS total_hours FROM event_PickUpEmptyContainer e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container' ORDER BY total_hours DESC LIMIT 5;",
+  "colonne": [
+   "ocel_object_id",
+   "total_hours"
+  ],
+  "righe": [
+   [
+    "cr1850",
+    626.73
+   ],
+   [
+    "cr281",
+    609.24
+   ],
+   [
+    "cr248",
+    601.52
+   ],
+   [
+    "cr1127",
+    596.67
+   ],
+   [
+    "cr1068",
+    589.04
+   ]
+  ]
+ },
+ "121": {
+  "tipo": "set",
+  "query": "SELECT eo1.ocel_object_id, ROUND((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0, 2) AS total_hours FROM event_PickUpEmptyContainer e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container' ORDER BY total_hours ASC LIMIT 5;",
+  "colonne": [
+   "ocel_object_id",
+   "total_hours"
+  ],
+  "righe": [
+   [
+    "cr1769",
+    1.88
+   ],
+   [
+    "cr1377",
+    1.96
+   ],
+   [
+    "cr228",
+    2.08
+   ],
+   [
+    "cr785",
+    2.75
+   ],
+   [
+    "cr1563",
+    2.8
+   ]
+  ]
+ },
+ "122": {
+  "tipo": "set",
+  "query": "SELECT eo1.ocel_object_id, ROUND((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0, 2) AS transit_hours FROM event_LoadTruck e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_DrivetoTerminal e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Handling Unit' ORDER BY transit_hours DESC LIMIT 5;",
+  "colonne": [
+   "ocel_object_id",
+   "transit_hours"
+  ],
+  "righe": []
+ },
+ "123": {
+  "tipo": "set",
+  "query": "SELECT eo1.ocel_object_id, ROUND((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0, 2) AS prep_hours FROM event_CollectGoods e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadTruck e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Handling Unit' ORDER BY prep_hours DESC LIMIT 5;",
+  "colonne": [
+   "ocel_object_id",
+   "prep_hours"
+  ],
+  "righe": [
+   [
+    "hu1753",
+    66.47
+   ],
+   [
+    "hu4942",
+    66.11
+   ],
+   [
+    "hu1751",
+    66.0
+   ],
+   [
+    "hu9993",
+    65.76
+   ],
+   [
+    "hu9995",
+    65.6
+   ]
+  ]
+ },
+ "124": {
+  "tipo": "set",
+  "query": "SELECT strftime('%Y-%m', ocel_time) AS mese, COUNT(*) AS cnt FROM event_RegisterCustomerOrder GROUP BY mese ORDER BY mese;",
+  "colonne": [
+   "mese",
+   "cnt"
+  ],
+  "righe": [
+   [
+    "2023-05",
+    15
+   ],
+   [
+    "2023-06",
+    40
+   ],
+   [
+    "2023-07",
+    39
+   ],
+   [
+    "2023-08",
+    43
+   ],
+   [
+    "2023-09",
+    38
+   ],
+   [
+    "2023-10",
+    41
+   ],
+   [
+    "2023-11",
+    41
+   ],
+   [
+    "2023-12",
+    38
+   ],
+   [
+    "2024-01",
+    42
+   ],
+   [
+    "2024-02",
+    39
+   ],
+   [
+    "2024-03",
+    38
+   ],
+   [
+    "2024-04",
+    41
+   ],
+   [
+    "2024-05",
+    41
+   ],
+   [
+    "2024-06",
+    37
+   ],
+   [
+    "2024-07",
+    43
+   ],
+   [
+    "2024-08",
+    24
+   ]
+  ]
+ },
+ "125": {
+  "tipo": "set",
+  "query": "SELECT strftime('%Y-%m', ocel_time) AS mese, COUNT(*) AS cnt FROM event_Depart GROUP BY mese ORDER BY mese;",
+  "colonne": [
+   "mese",
+   "cnt"
+  ],
+  "righe": [
+   [
+    "2023-05",
+    1
+   ],
+   [
+    "2023-06",
+    9
+   ],
+   [
+    "2023-07",
+    8
+   ],
+   [
+    "2023-08",
+    9
+   ],
+   [
+    "2023-09",
+    9
+   ],
+   [
+    "2023-10",
+    9
+   ],
+   [
+    "2023-11",
+    7
+   ],
+   [
+    "2023-12",
+    9
+   ],
+   [
+    "2024-01",
+    9
+   ],
+   [
+    "2024-02",
+    7
+   ],
+   [
+    "2024-03",
+    9
+   ],
+   [
+    "2024-04",
+    9
+   ],
+   [
+    "2024-05",
+    9
+   ],
+   [
+    "2024-06",
+    8
+   ],
+   [
+    "2024-07",
+    9
+   ],
+   [
+    "2024-08",
+    6
+   ]
+  ]
+ },
+ "126": {
+  "tipo": "set",
+  "query": "SELECT strftime('%Y-%m', ocel_time) AS mese, COUNT(*) AS cnt FROM event_RescheduleContainer GROUP BY mese ORDER BY cnt DESC;",
+  "colonne": [
+   "mese",
+   "cnt"
+  ],
+  "righe": [
+   [
+    "2023-08",
+    14
+   ],
+   [
+    "2023-09",
+    9
+   ],
+   [
+    "2024-07",
+    3
+   ],
+   [
+    "2023-12",
+    3
+   ],
+   [
+    "2023-11",
+    2
+   ],
+   [
+    "2023-06",
+    2
+   ],
+   [
+    "2024-08",
+    1
+   ],
+   [
+    "2024-06",
+    1
+   ],
+   [
+    "2023-07",
+    1
+   ]
+  ]
+ },
+ "127": {
+  "tipo": "set",
+  "query": "SELECT eo_v.ocel_object_id AS vehicle_id, COUNT(DISTINCT eo_c.ocel_object_id) AS rescheduled_cnt FROM event_RescheduleContainer er JOIN event_object eo_c ON er.ocel_id = eo_c.ocel_event_id JOIN event_object eo_lv_c ON eo_c.ocel_object_id = eo_lv_c.ocel_object_id JOIN event_LoadtoVehicle elv ON elv.ocel_id = eo_lv_c.ocel_event_id JOIN event_object eo_v ON elv.ocel_id = eo_v.ocel_event_id JOIN object ov ON ov.ocel_id = eo_v.ocel_object_id WHERE ov.ocel_type = 'Vehicle' GROUP BY eo_v.ocel_object_id ORDER BY rescheduled_cnt DESC, vehicle_id ASC LIMIT 10;",
+  "colonne": [
+   "vehicle_id",
+   "rescheduled_cnt"
+  ],
+  "righe": [
+   [
+    "vh30",
+    8
+   ],
+   [
+    "vh28",
+    6
+   ],
+   [
+    "vh26",
+    4
+   ],
+   [
+    "vh22",
+    3
+   ],
+   [
+    "vh23",
+    3
+   ],
+   [
+    "vh29",
+    3
+   ],
+   [
+    "vh48",
+    3
+   ],
+   [
+    "vh58",
+    3
+   ],
+   [
+    "vh6",
+    3
+   ],
+   [
+    "vh112",
+    2
+   ]
+  ]
+ },
+ "128": {
+  "tipo": "set",
+  "query": "SELECT eo_f.ocel_object_id AS forklift_id, COUNT(DISTINCT eo_c.ocel_object_id) AS containers_moved FROM event_PlaceinStock eps JOIN event_object eo_f ON eps.ocel_id = eo_f.ocel_event_id JOIN object ofl ON ofl.ocel_id = eo_f.ocel_object_id AND ofl.ocel_type = 'Forklift' JOIN event_object eo_c ON eps.ocel_id = eo_c.ocel_event_id JOIN object oc ON oc.ocel_id = eo_c.ocel_object_id AND oc.ocel_type = 'Container' GROUP BY eo_f.ocel_object_id ORDER BY containers_moved DESC;",
+  "colonne": [
+   "forklift_id",
+   "containers_moved"
+  ],
+  "righe": [
+   [
+    "fl1",
+    626
+   ],
+   [
+    "fl2",
+    594
+   ],
+   [
+    "fl3",
+    594
+   ]
+  ]
+ },
+ "129": {
+  "tipo": "set",
+  "query": "SELECT eo_t.ocel_object_id AS truck_id, COUNT(DISTINCT eo_c.ocel_object_id) AS containers_carried FROM event_DrivetoTerminal edt JOIN event_object eo_t ON edt.ocel_id = eo_t.ocel_event_id JOIN object ot ON ot.ocel_id = eo_t.ocel_object_id AND ot.ocel_type = 'Truck' JOIN event_object eo_c ON edt.ocel_id = eo_c.ocel_event_id JOIN object oc ON oc.ocel_id = eo_c.ocel_object_id AND oc.ocel_type = 'Container' GROUP BY eo_t.ocel_object_id ORDER BY containers_carried DESC;",
+  "colonne": [
+   "truck_id",
+   "containers_carried"
+  ],
+  "righe": [
+   [
+    "tr3",
+    335
+   ],
+   [
+    "tr5",
+    335
+   ],
+   [
+    "tr6",
+    333
+   ],
+   [
+    "tr1",
+    332
+   ],
+   [
+    "tr4",
+    332
+   ],
+   [
+    "tr2",
+    322
+   ]
+  ]
+ },
+ "130": {
+  "tipo": "set",
+  "query": "SELECT c.ocel_id, MAX(c.Weight) AS w FROM object_Container c JOIN event_object eo ON c.ocel_id = eo.ocel_object_id JOIN event_RescheduleContainer er ON er.ocel_id = eo.ocel_event_id WHERE c.Weight IS NOT NULL GROUP BY c.ocel_id ORDER BY w DESC LIMIT 10;",
+  "colonne": [
+   "ocel_id",
+   "w"
+  ],
+  "righe": [
+   [
+    "cr168",
+    "null"
+   ],
+   [
+    "cr1759",
+    "null"
+   ],
+   [
+    "cr1801",
+    "null"
+   ],
+   [
+    "cr1806",
+    "null"
+   ],
+   [
+    "cr1901",
+    "null"
+   ],
+   [
+    "cr2000",
+    "null"
+   ],
+   [
+    "cr239",
+    "null"
+   ],
+   [
+    "cr303",
+    "null"
+   ],
+   [
+    "cr311",
+    "null"
+   ],
+   [
+    "cr314",
+    "null"
+   ]
+  ]
+ },
+ "131": {
+  "tipo": "set",
+  "query": "SELECT eo1.ocel_object_id, ROUND(((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) + 8.0, 2) AS new_wait_hours FROM event_BringtoLoadingBay e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container' ORDER BY new_wait_hours DESC LIMIT 5;",
+  "colonne": [
+   "ocel_object_id",
+   "new_wait_hours"
+  ],
+  "righe": [
+   [
+    "cr1901",
+    148.42
+   ],
+   [
+    "cr370",
+    140.61
+   ],
+   [
+    "cr356",
+    103.82
+   ],
+   [
+    "cr168",
+    101.34
+   ],
+   [
+    "cr398",
+    96.99
+   ]
+  ]
+ },
+ "132": {
+  "tipo": "set",
+  "query": "SELECT eo1.ocel_object_id, ROUND(((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) * 0.7, 2) AS reduced_stock_hours FROM event_PlaceinStock e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_BringtoLoadingBay e2 ON e2.ocel_id = eo2.ocel_event_id JOIN object o ON o.ocel_id = eo1.ocel_object_id WHERE o.ocel_type = 'Container' ORDER BY reduced_stock_hours DESC LIMIT 5;",
+  "colonne": [
+   "ocel_object_id",
+   "reduced_stock_hours"
+  ],
+  "righe": [
+   [
+    "cr1850",
+    437.17
+   ],
+   [
+    "cr1127",
+    415.59
+   ],
+   [
+    "cr248",
+    407.87
+   ],
+   [
+    "cr1068",
+    402.84
+   ],
+   [
+    "cr675",
+    400.61
+   ]
+  ]
+ },
+ "133": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, ROUND(MAX(AmountofGoods) * 1.20, 2) AS projected_goods FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL GROUP BY ocel_id ORDER BY projected_goods DESC, ocel_id ASC LIMIT 5;",
+  "colonne": [
+   "ocel_id",
+   "projected_goods"
+  ],
+  "righe": [
+   [
+    "co11",
+    1800.0
+   ],
+   [
+    "co20",
+    1800.0
+   ],
+   [
+    "co226",
+    1800.0
+   ],
+   [
+    "co252",
+    1800.0
+   ],
+   [
+    "co264",
+    1800.0
+   ]
+  ]
+ },
+ "134": {
+  "tipo": "set",
+  "query": "SELECT ocel_id, ROUND(MAX(Weight) * 1.10, 2) AS projected_weight FROM object_Container WHERE Weight IS NOT NULL GROUP BY ocel_id ORDER BY projected_weight DESC, ocel_id ASC LIMIT 5;",
+  "colonne": [
+   "ocel_id",
+   "projected_weight"
+  ],
+  "righe": [
+   [
+    "cr1",
+    0.0
+   ],
+   [
+    "cr10",
+    0.0
+   ],
+   [
+    "cr100",
+    0.0
+   ],
+   [
+    "cr1000",
+    0.0
+   ],
+   [
+    "cr1001",
+    0.0
+   ]
+  ]
+ },
+ "135": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT eo_c.ocel_object_id FROM event_BringtoLoadingBay e_bay JOIN event_object eo_c ON e_bay.ocel_id = eo_c.ocel_event_id JOIN object oc ON oc.ocel_id = eo_c.ocel_object_id AND oc.ocel_type = 'Container' JOIN event_object eo_lv_c ON oc.ocel_id = eo_lv_c.ocel_object_id JOIN event_LoadtoVehicle elv ON elv.ocel_id = eo_lv_c.ocel_event_id JOIN event_object eo_v ON elv.ocel_id = eo_v.ocel_event_id JOIN object ov ON ov.ocel_id = eo_v.ocel_object_id AND ov.ocel_type = 'Vehicle' JOIN event_object eo_dep ON ov.ocel_id = eo_dep.ocel_object_id JOIN event_Depart edep ON edep.ocel_id = eo_dep.ocel_event_id WHERE (strftime('%s', e_bay.ocel_time) + 6*3600) > strftime('%s', edep.ocel_time) ORDER BY eo_c.ocel_object_id LIMIT 10;",
+  "colonne": [
+   "ocel_object_id"
+  ],
+  "righe": []
+ },
+ "136": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT o.ocel_type FROM event_Weigh e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id ORDER BY o.ocel_type;",
+  "colonne": [
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "Container"
+   ],
+   [
+    "Forklift"
+   ]
+  ]
+ },
+ "137": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT o.ocel_type FROM event_CollectGoods e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id ORDER BY o.ocel_type;",
+  "colonne": [
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "Handling Unit"
+   ]
+  ]
+ },
+ "138": {
+  "tipo": "set",
+  "query": "SELECT DISTINCT o.ocel_type FROM event_PickUpEmptyContainer e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id ORDER BY o.ocel_type;",
+  "colonne": [
+   "ocel_type"
+  ],
+  "righe": [
+   [
+    "Container"
+   ]
+  ]
+ },
+ "139": {
+  "tipo": "set",
+  "query": "SELECT eo_v.ocel_object_id AS vehicle_id, COUNT(DISTINCT eo_c.ocel_object_id) AS container_cnt FROM event_LoadtoVehicle elv JOIN event_object eo_v ON elv.ocel_id = eo_v.ocel_event_id JOIN object ov ON ov.ocel_id = eo_v.ocel_object_id AND ov.ocel_type = 'Vehicle' JOIN event_object eo_c ON elv.ocel_id = eo_c.ocel_event_id JOIN object oc ON oc.ocel_id = eo_c.ocel_object_id AND oc.ocel_type = 'Container' GROUP BY eo_v.ocel_object_id ORDER BY container_cnt DESC, vehicle_id ASC LIMIT 10;",
+  "colonne": [
+   "vehicle_id",
+   "container_cnt"
+  ],
+  "righe": [
+   [
+    "vh56",
+    39
+   ],
+   [
+    "vh30",
+    32
+   ],
+   [
+    "vh48",
+    32
+   ],
+   [
+    "vh70",
+    32
+   ],
+   [
+    "vh39",
+    30
+   ],
+   [
+    "vh84",
+    30
+   ],
+   [
+    "vh111",
+    29
+   ],
+   [
+    "vh6",
+    27
+   ],
+   [
+    "vh95",
+    27
+   ],
+   [
+    "vh10",
+    26
+   ]
+  ]
+ },
+ "140": {
+  "tipo": "set",
+  "query": "SELECT eo_t.ocel_object_id AS truck_id, ROUND(AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0), 2) AS avg_hours FROM event_LoadTruck e1 JOIN event_object eo_t ON e1.ocel_id = eo_t.ocel_event_id JOIN object ot ON ot.ocel_id = eo_t.ocel_object_id AND ot.ocel_type = 'Truck' JOIN event_object eo_hu ON e1.ocel_id = eo_hu.ocel_event_id JOIN object ohu ON ohu.ocel_id = eo_hu.ocel_object_id AND ohu.ocel_type = 'Handling Unit' JOIN event_object eo_hu2 ON ohu.ocel_id = eo_hu2.ocel_object_id JOIN event_DrivetoTerminal e2 ON e2.ocel_id = eo_hu2.ocel_event_id GROUP BY eo_t.ocel_object_id ORDER BY avg_hours DESC;",
+  "colonne": [
+   "truck_id",
+   "avg_hours"
+  ],
+  "righe": []
+ },
+ "141": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_RescheduleContainer) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "142": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_Container GROUP BY ocel_id HAVING COUNT(Status) > 0 AND COUNT(Weight) > 0) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "143": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_Container WHERE AmountofHandlingUnits = 0) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "144": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_Container WHERE AmountofHandlingUnits > 6) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "145": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_Container WHERE AmountofHandlingUnits = 6) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "146": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_CustomerOrder WHERE AmountofGoods > 2000) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "147": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_CustomerOrder WHERE AmountofGoods >= 1500) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "148": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_CustomerOrder WHERE AmountofGoods < 300) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "149": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_TransportDocument WHERE AmountofContainers > 5) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "150": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_TransportDocument WHERE AmountofContainers = 5) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "151": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object o WHERE NOT EXISTS (SELECT 1 FROM event_object eo WHERE eo.ocel_object_id = o.ocel_id)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "152": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event e WHERE NOT EXISTS (SELECT 1 FROM event_object eo WHERE eo.ocel_event_id = e.ocel_id)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "153": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (SELECT COUNT(*) FROM object WHERE ocel_type = 'Truck') > 10 THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "154": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (SELECT COUNT(*) FROM object WHERE ocel_type = 'Forklift') < 5 THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "155": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (SELECT COUNT(*) FROM object WHERE ocel_type = 'Container') > (SELECT COUNT(*) FROM object WHERE ocel_type = 'Customer Order') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "156": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (SELECT COUNT(*) FROM object WHERE ocel_type = 'Vehicle') > (SELECT COUNT(*) FROM object WHERE ocel_type = 'Transport Document') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "157": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_LoadTruck e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Truck') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "158": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_LoadTruck e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Forklift') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "159": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_PlaceinStock e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Forklift') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "160": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_BringtoLoadingBay e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Forklift') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "161": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_RegisterCustomerOrder e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Container') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "162": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_Depart e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Truck') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "163": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_Depart e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Vehicle') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "164": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_Weigh e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Customer Order') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "165": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_object oo JOIN object os ON os.ocel_id = oo.ocel_source_id JOIN object ot ON ot.ocel_id = oo.ocel_target_id WHERE os.ocel_type = 'Customer Order' AND ot.ocel_type = 'Transport Document') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "166": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_object oo JOIN object os ON os.ocel_id = oo.ocel_source_id JOIN object ot ON ot.ocel_id = oo.ocel_target_id WHERE os.ocel_type = 'Forklift' AND ot.ocel_type = 'Vehicle') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "167": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_object oo JOIN object os ON os.ocel_id = oo.ocel_source_id JOIN object ot ON ot.ocel_id = oo.ocel_target_id WHERE os.ocel_type = 'Truck' AND ot.ocel_type = 'Customer Order') THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "168": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM object_object s JOIN object_object d ON s.ocel_source_id = d.ocel_target_id) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "169": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_object GROUP BY ocel_event_id HAVING COUNT(DISTINCT ocel_object_id) > 50) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "170": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_object GROUP BY ocel_event_id HAVING COUNT(DISTINCT ocel_object_id) > 100) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "171": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (SELECT COUNT(*) FROM event_CollectGoods) = (SELECT COUNT(*) FROM event_LoadTruck) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "172": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (SELECT COUNT(*) FROM event_DrivetoTerminal) = (SELECT COUNT(*) FROM event_Weigh) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "173": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (SELECT COUNT(*) FROM event_PlaceinStock) = (SELECT COUNT(*) FROM event_BringtoLoadingBay) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "174": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (SELECT COUNT(*) FROM event_BookVehicles) = (SELECT COUNT(*) FROM event_CreateTransportDocument) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "175": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (SELECT COUNT(*) FROM event_RescheduleContainer) > 100 THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "176": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_PickUpEmptyContainer e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_Weigh e2 ON e2.ocel_id = eo2.ocel_event_id WHERE strftime('%s', e2.ocel_time) < strftime('%s', e1.ocel_time)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "177": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_Weigh e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_PlaceinStock e2 ON e2.ocel_id = eo2.ocel_event_id WHERE strftime('%s', e2.ocel_time) < strftime('%s', e1.ocel_time)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "178": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_BringtoLoadingBay e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id WHERE strftime('%s', e2.ocel_time) < strftime('%s', e1.ocel_time)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "179": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_CollectGoods e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadTruck e2 ON e2.ocel_id = eo2.ocel_event_id WHERE strftime('%s', e2.ocel_time) < strftime('%s', e1.ocel_time)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "180": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_PlaceinStock e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_BringtoLoadingBay e2 ON e2.ocel_id = eo2.ocel_event_id WHERE strftime('%s', e2.ocel_time) > strftime('%s', e1.ocel_time)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "181": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_Weigh e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Container' GROUP BY eo.ocel_object_id HAVING COUNT(DISTINCT e.ocel_id) > 1) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "182": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_RescheduleContainer e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Container' GROUP BY eo.ocel_object_id HAVING COUNT(DISTINCT e.ocel_id) > 1) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "183": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_LoadTruck e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Truck' GROUP BY eo.ocel_object_id HAVING COUNT(DISTINCT e.ocel_id) > 1000) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "184": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_PlaceinStock e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Container' AND NOT EXISTS (SELECT 1 FROM event_object eo2 JOIN event_LoadtoVehicle elv ON elv.ocel_id = eo2.ocel_event_id WHERE eo2.ocel_object_id = o.ocel_id)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "185": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_PickUpEmptyContainer e JOIN event_object eo ON e.ocel_id = eo.ocel_event_id JOIN object o ON o.ocel_id = eo.ocel_object_id WHERE o.ocel_type = 'Container' AND NOT EXISTS (SELECT 1 FROM event_object eo2 JOIN event_PlaceinStock eps ON eps.ocel_id = eo2.ocel_event_id WHERE eo2.ocel_object_id = o.ocel_id)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "186": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 10.0 THEN 'SI' ELSE 'NO' END FROM event_PlaceinStock e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_BringtoLoadingBay e2 ON e2.ocel_id = eo2.ocel_event_id;",
+  "colonne": [
+   "CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 10.0 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "187": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 500.0 THEN 'SI' ELSE 'NO' END FROM event_PlaceinStock e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_BringtoLoadingBay e2 ON e2.ocel_id = eo2.ocel_event_id;",
+  "colonne": [
+   "CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 500.0 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "188": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 100.0 THEN 'SI' ELSE 'NO' END FROM event_BringtoLoadingBay e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id;",
+  "colonne": [
+   "CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 100.0 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "189": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 0.5 THEN 'SI' ELSE 'NO' END FROM event_BringtoLoadingBay e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id;",
+  "colonne": [
+   "CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 0.5 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "190": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 200.0 THEN 'SI' ELSE 'NO' END FROM event_LoadTruck e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_DrivetoTerminal e2 ON e2.ocel_id = eo2.ocel_event_id;",
+  "colonne": [
+   "CASE WHEN AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) > 200.0 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "191": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) + 5.0) > 8.0 THEN 'SI' ELSE 'NO' END FROM event_BringtoLoadingBay e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id;",
+  "colonne": [
+   "CASE WHEN (AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) + 5.0) > 8.0 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "192": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) + 5.0) > 200.0 THEN 'SI' ELSE 'NO' END FROM event_BringtoLoadingBay e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id;",
+  "colonne": [
+   "CASE WHEN (AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) + 5.0) > 200.0 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "193": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (AVG(AmountofGoods) * 1.25) > 1000.0 THEN 'SI' ELSE 'NO' END FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL;",
+  "colonne": [
+   "CASE WHEN (AVG(AmountofGoods) * 1.25) > 1000.0 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "194": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (AVG(AmountofGoods) * 1.25) > 2500.0 THEN 'SI' ELSE 'NO' END FROM object_CustomerOrder WHERE AmountofGoods IS NOT NULL;",
+  "colonne": [
+   "CASE WHEN (AVG(AmountofGoods) * 1.25) > 2500.0 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "195": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (MAX(AmountofHandlingUnits) + 2) > 7 THEN 'SI' ELSE 'NO' END FROM object_Container WHERE AmountofHandlingUnits IS NOT NULL;",
+  "colonne": [
+   "CASE WHEN (MAX(AmountofHandlingUnits) + 2) > 7 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "196": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (MAX(AmountofHandlingUnits) + 2) > 15 THEN 'SI' ELSE 'NO' END FROM object_Container WHERE AmountofHandlingUnits IS NOT NULL;",
+  "colonne": [
+   "CASE WHEN (MAX(AmountofHandlingUnits) + 2) > 15 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "197": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (MAX(AmountofContainers) + 1) > 5 THEN 'SI' ELSE 'NO' END FROM object_TransportDocument WHERE AmountofContainers IS NOT NULL;",
+  "colonne": [
+   "CASE WHEN (MAX(AmountofContainers) + 1) > 5 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "SI"
+   ]
+  ]
+ },
+ "198": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (MAX(AmountofContainers) + 1) > 10 THEN 'SI' ELSE 'NO' END FROM object_TransportDocument WHERE AmountofContainers IS NOT NULL;",
+  "colonne": [
+   "CASE WHEN (MAX(AmountofContainers) + 1) > 10 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "199": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN EXISTS (SELECT 1 FROM event_BringtoLoadingBay e_bay JOIN event_object eo_c ON e_bay.ocel_id = eo_c.ocel_event_id JOIN object oc ON oc.ocel_id = eo_c.ocel_object_id AND oc.ocel_type = 'Container' JOIN event_object eo_lv_c ON oc.ocel_id = eo_lv_c.ocel_object_id JOIN event_LoadtoVehicle elv ON elv.ocel_id = eo_lv_c.ocel_event_id JOIN event_object eo_v ON elv.ocel_id = eo_v.ocel_event_id JOIN object ov ON ov.ocel_id = eo_v.ocel_object_id AND ov.ocel_type = 'Vehicle' JOIN event_object eo_dep ON ov.ocel_id = eo_dep.ocel_object_id JOIN event_Depart edep ON edep.ocel_id = eo_dep.ocel_event_id WHERE (strftime('%s', e_bay.ocel_time) + 48*3600) > strftime('%s', edep.ocel_time)) THEN 'SI' ELSE 'NO' END AS risposta;",
+  "colonne": [
+   "risposta"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ },
+ "200": {
+  "tipo": "boolean",
+  "query": "SELECT CASE WHEN (AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) * 0.5) < 1.0 THEN 'SI' ELSE 'NO' END FROM event_PickUpEmptyContainer e1 JOIN event_object eo1 ON e1.ocel_id = eo1.ocel_event_id JOIN event_object eo2 ON eo1.ocel_object_id = eo2.ocel_object_id JOIN event_LoadtoVehicle e2 ON e2.ocel_id = eo2.ocel_event_id;",
+  "colonne": [
+   "CASE WHEN (AVG((strftime('%s', e2.ocel_time) - strftime('%s', e1.ocel_time)) / 3600.0) * 0.5) < 1.0 THEN 'SI' ELSE 'NO' END"
+  ],
+  "righe": [
+   [
+    "NO"
+   ]
+  ]
+ }
+}

@@ -1,0 +1,15 @@
+ocel_id,ocel_type
+depart_vh4,Depart
+drive_term_cr1,Drive to Terminal
+load_truck_hu59,Load Truck
+load_truck_hu60,Load Truck
+load_truck_hu61,Load Truck
+load_truck_hu62,Load Truck
+load_truck_hu63,Load Truck
+load_truck_hu64,Load Truck
+load_veh_cr1,Load to Vehicle
+order_crs_td1,Order Empty Containers
+pick_cr1,Pick Up Empty Container
+stock_cr1,Place in Stock
+to_bay_cr1,Bring to Loading Bay
+weigh_cr1,Weigh

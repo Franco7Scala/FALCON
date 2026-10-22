@@ -48,6 +48,18 @@ def crea_stato_iniziale(richiesta_utente: str) -> PipelineState:
 # Node "Agente 1 - Estrazione informazioni"
 def esegui_agente_1_estrazione(state: PipelineState) -> dict:
 
+    # Benchmark adapters may provide a validated, structured process-query
+    # specification from workbook columns. Preserve it instead of re-parsing
+    # the same fields from natural language.
+    if (state.get("classificazione") == "IN_CONTESTO"
+            and (state.get("informazioni_estratte") or "").startswith((
+                "TASK=NEXT_ACTIVITY_PREDICTION", "TASK=BOOLEAN_QUERY",
+            ))):
+        return {
+            "classificazione": state["classificazione"],
+            "informazioni_estratte": state["informazioni_estratte"],
+        }
+
     classificazione, informazioni = estrai_informazioni(
         state["richiesta_utente"], state["schema_database"]
     )
@@ -85,7 +97,10 @@ def esegui_agente_2(state: PipelineState) -> dict:
 # Node "Agente 3 - Esecuzione e valutazione dei risultati"
 def esegui_agente_3(state: PipelineState) -> dict:
 
-    risultato = esegui_e_valuta(state["richiesta_utente"], state["query_corrente"])
+    risultato = esegui_e_valuta(
+        state["richiesta_utente"], state["query_corrente"],
+        task_info=state.get("informazioni_estratte"),
+    )
 
     aggiornamento = \
     {
@@ -104,6 +119,10 @@ def esegui_agente_3(state: PipelineState) -> dict:
 def route_dopo_valutazione(state: PipelineState) -> str:
     if "SODDISFATTA" in (state["valutazione"] or ""):
         return "soddisfatta"
+    if (state.get("informazioni_estratte") or "").startswith("TASK=NEXT_ACTIVITY_PREDICTION"):
+        # The structured NSP query is template-generated; retrying it verbatim
+        # cannot repair an empty match and only repeats the same execution.
+        return "limite_raggiunto"
     if state["tentativi_miglioramento"] >= MAX_TENTATIVI:
         return "limite_raggiunto"
     return "da_rigenerare"
