@@ -2,13 +2,14 @@
 # actually satisfy the user's original request, and either answers or asks
 # Agent 2 to regenerate the query.
 import ast
+import re
 from typing import Optional
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from utils.utils import crea_llm, DB
 
-# non-thinking Instruct release: never produces <think> blocks
-MODEL_NAME = "Qwen/Qwen3-4B-Instruct-2507"
+# Text-only instruction model; compatible with the current causal-LM loader.
+MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct"
 
 
 def _estrai_dopo_etichetta(testo: str, etichetta: str, fino_a: Optional[str] = None) -> Optional[str]:
@@ -142,6 +143,73 @@ def _valore_booleano_sql(risultati: str):
     return None
 
 
+def _controllo_booleano_statico(richiesta: str, query: str, schema: str) -> Optional[str]:
+    """Catch common OCEL boolean SQL mistakes before accepting the LLM judge."""
+    sql = re.sub(r"\s+", " ", query).casefold()
+    question = richiesta.casefold()
+
+    # OCEL event/object identifiers are separate domains. They must be linked
+    # through event_object, never by joining their similarly named id columns.
+    event_aliases = set(re.findall(r"\b(?:from|join)\s+event\s+(\w+)", sql))
+    object_aliases = set(re.findall(r"\bjoin\s+object\s+(\w+)", sql))
+    if any(re.search(
+        rf"\b{re.escape(event_alias)}\.ocel_id\s*=\s*{re.escape(object_alias)}\.ocel_id\b|"
+        rf"\b{re.escape(object_alias)}\.ocel_id\s*=\s*{re.escape(event_alias)}\.ocel_id\b",
+        sql,
+    ) for event_alias in event_aliases for object_alias in object_aliases):
+        return "Event IDs and object IDs are different key domains. Link events to objects through event_object(ocel_event_id, ocel_object_id), then join object on ocel_id."
+
+    # Reject a mapped activity label used as if it were the raw event.ocel_type.
+    event_type_by_table = {}
+    for table_suffix, raw_type in re.findall(
+        r"event_(\w+)\s*\(mapped type\s*'([^']+)'", schema, flags=re.IGNORECASE
+    ):
+        event_type_by_table[table_suffix.casefold()] = raw_type
+        # Reject using an event table's mapped suffix as a raw event.ocel_type.
+        if table_suffix.casefold() != raw_type.casefold() and re.search(
+            rf"\b\w+\.ocel_type\s*=\s*['\"]{re.escape(table_suffix)}['\"]", sql
+        ):
+            return (f"The mapped activity label {table_suffix!r} is not the raw event type "
+                    f"{raw_type!r}. Use the schema mapping or compare the correct label.")
+
+    # The event subtype table joined for a timestamp must correspond to the
+    # raw activity type selected on its parent event row.
+    for suffix, subtype_alias, parent_alias in re.findall(
+        r"\bjoin\s+event_(\w+)\s+(\w+)\s+on\s+"
+        r"(\w+)\.ocel_id\s*=\s*\2\.ocel_id",
+        sql,
+    ):
+        expected_raw = event_type_by_table.get(suffix.casefold())
+        if not expected_raw:
+            continue
+        type_conditions = re.findall(
+            rf"\b{re.escape(parent_alias)}\.ocel_type\s*=\s*['\"]([^'\"]+)['\"]",
+            sql,
+        )
+        if type_conditions and all(value.casefold() != expected_raw.casefold() for value in type_conditions):
+            return (f"The timestamp is read from event_{suffix}, which belongs to raw event type "
+                    f"{expected_raw!r}, but its parent event row is filtered as {type_conditions!r}. "
+                    "Join the event subtype table that matches the event type being compared.")
+
+    # A container weighing query must exclude other object types that can also
+    # participate in a Weigh event (e.g. forklift or truck).
+    if ("container" in question and re.search(r"\b(?:weigh|pesat)", question)
+            and "event_weigh" in sql
+            and not re.search(r"object_container|ocel_type\s*=\s*['\"]container['\"]", sql)):
+        return "The request is specifically about containers, but the Weigh events are not restricted to Container objects. Join the event_object link to object and filter its mapped/raw type using the schema."
+
+    # Cross-object temporal claims need an explicit relationship path.
+    cross_object = ("container" in question and "vehicle" in question
+                    and re.search(r"\b(?:depart|departure|partenz|ritard|delay)", question))
+    has_depart = "event_depart" in sql
+    linked_paths = ("object_object" in sql or
+                    len(re.findall(r"\bevent_object\s+\w+", sql)) >= 2)
+    if cross_object and has_depart and not linked_paths:
+        return "The query compares a container and a vehicle, but does not establish their relationship. Join both through event_object/object_object and correlate the shared event/object relationship before comparing timestamps."
+
+    return None
+
+
 def get_prompt_valutazione_risultati():
     return ChatPromptTemplate.from_messages([
         (
@@ -226,12 +294,22 @@ def get_prompt_valutazione_risultati():
 
             For a structured TASK=BOOLEAN_QUERY, the SQL must return exactly
             one row and one column with SI/NO or an equivalent boolean value.
-            Check that the SQL evaluates the complete proposition. A raw count,
-            list of matching records, multiple columns, or empty result does
-            not answer a yes/no request. For Italian quantities, interpret a
-            dot before groups of three digits as a thousands separator when
-            used with counts or units (e.g. 2.000 means 2000); keep decimal
-            fractions such as 0.5 unchanged.
+            Check the predicate against the request and supplied schema; the
+            presence of CASE/EXISTS and a boolean-shaped result is not enough.
+            Resolve activity/object labels through mapping tables rather than
+            assuming a mapped label equals the raw OCEL type. For a temporal
+            condition, verify each timestamp comes from the event_<type>
+            table corresponding to that event and that events are linked to
+            the same requested object/case. For cross-object claims, verify
+            the relationship is established through event_object or
+            object_object; unrelated events do not prove a shared scenario.
+            Count comparisons must compare separate scalar counts, never
+            counts from a Cartesian product. What-if questions must apply the
+            stated change before testing the threshold. A raw count, list of
+            records, multiple columns, or empty result does not answer yes/no.
+            For Italian quantities, a dot before groups of three digits in a
+            count/unit context means a thousands separator (2.000 = 2000);
+            keep decimal fractions such as 0.5 unchanged.
             
             Return only the specified output format. Do not include Markdown
             or additional commentary.
@@ -242,6 +320,9 @@ def get_prompt_valutazione_risultati():
             """
             Original user request:
             {richiesta}
+
+            Database schema:
+            {schema}
             
             Executed SQL query:
             {query}
@@ -255,7 +336,8 @@ def get_prompt_valutazione_risultati():
     ])
 
 
-def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] = None) -> dict:
+def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] = None,
+                    schema_database: Optional[str] = None) -> dict:
     """
     Executes `query` against the shared database connection (utils.DB) and
     evaluates whether its results satisfy richiesta_utente.
@@ -329,11 +411,22 @@ def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] 
                     "Do not return counts, record lists, multiple columns, or no rows."
                 ),
             }
+        feedback_booleano = _controllo_booleano_statico(
+            richiesta_utente, query, schema_database or ""
+        )
+        if feedback_booleano:
+            return {
+                "valutazione": "DA_RIGENERARE",
+                "risultati_query": risultati,
+                "risposta_finale": None,
+                "feedback": feedback_booleano,
+            }
 
     output_grezzo = CHAIN_VALUTAZIONE.invoke(
         {
             "richiesta": richiesta_utente,
             "query": query,
+            "schema": schema_database or "",
             "risultati_query": _riassumi_risultati(risultati),
         }
     )
@@ -355,7 +448,7 @@ def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] 
 
 
 # Initialization of model, prompt and chain
-LLM = crea_llm(MODEL_NAME)
+LLM = crea_llm(MODEL_NAME, carica_in_4bit=True)
 
 PROMPT_VALUTAZIONE = get_prompt_valutazione_risultati()
 CHAIN_VALUTAZIONE = PROMPT_VALUTAZIONE | LLM | StrOutputParser()

@@ -29,6 +29,9 @@ def orchestrator_schema_guidance(path: Path) -> str:
         event_types = con.execute(
             "SELECT ocel_type, ocel_type_map FROM event_map_type ORDER BY ocel_type_map"
         ).fetchall()
+        object_types = con.execute(
+            "SELECT ocel_type, ocel_type_map FROM object_map_type ORDER BY ocel_type_map"
+        ).fetchall()
         event_cols = {r[1] for r in con.execute('PRAGMA table_info("event")')}
     tables = ", ".join(f"event_{mapped} (mapped type {raw!r}; columns include ocel_id, ocel_time)"
                         for raw, mapped in event_types)
@@ -37,6 +40,9 @@ def orchestrator_schema_guidance(path: Path) -> str:
         f"- event columns: {', '.join(sorted(event_cols))}. Do not refer to event.ocel_time unless listed above.\n"
         "- Timestamps are stored in the per-event-type tables, joined by ocel_id to event.ocel_id.\n"
         f"- Per-event-type timestamp tables: {tables}.\n"
+        "- Raw-to-mapped object type labels: "
+        + ", ".join(f"{raw!r} -> {mapped!r}" for raw, mapped in object_types)
+        + ".\n"
         "- Event-object links are in event_object (ocel_event_id, ocel_object_id); object type is in object.ocel_type, "
         "with labels in object_map_type. For object traces, the case key is ocel_object_id, not event.ocel_id.\n"
         "- For temporal event queries, construct an event_times CTE by UNION ALL-ing "

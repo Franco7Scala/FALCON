@@ -4,8 +4,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from utils.utils import crea_llm
 
-# non-thinking Instruct release: never produces <think> blocks
-MODEL_NAME = "Qwen/Qwen3-4B-Instruct-2507"
+# Text-only instruction model; compatible with the current causal-LM loader.
+MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct"
 
 
 def _estrai_dopo_etichetta(testo: str, etichetta: str, fino_a: Optional[str] = None) -> Optional[str]:
@@ -148,7 +148,7 @@ def estrai_informazioni(richiesta_utente: str, schema_database: str) -> Tuple[st
 
 
 # Initialization of model, prompt and chain
-LLM = crea_llm(MODEL_NAME)
+LLM = crea_llm(MODEL_NAME, carica_in_4bit=True)
 
 PROMPT_ESTRAZIONE = get_prompt_estrazione()
 CHAIN_ESTRAZIONE = PROMPT_ESTRAZIONE | LLM | StrOutputParser()

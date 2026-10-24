@@ -38,6 +38,41 @@ def _norm(value: Any) -> str:
     return re.sub(r"\s+", " ", str(value or "").strip().casefold())
 
 
+def _infer_category(raw_category: Any, object_type: Any, target: Any,
+                    trace: Any, question: str) -> str:
+    """Infer benchmark task type from explicit labels and NSP workbook metadata."""
+    raw = _norm(raw_category)
+    if raw in {"boolean", "scalar", "set"}:
+        return raw
+    if object_type is None and raw not in {"nsp", "next_step"}:
+        return raw or "generic"
+
+    target_text = str(target or "").strip()
+    target_norm = _norm(target_text)
+    question_norm = _norm(question)
+    trace_text = str(trace or "")
+
+    # Probability and transition-matrix rows contain one or more result tuples,
+    # so evaluate them as relational row sets rather than next-step labels.
+    if ("global top-1" in target_norm or "matrix" in target_norm
+            or "prob" in target_norm or "probabilit" in question_norm):
+        return "set"
+    # What-if NSP rows ask for a scenario-dependent activity, not an observed
+    # next event in the historical trace.
+    if "what-if nsp" in target_norm or "what-if nsp" in question_norm:
+        return "scalar"
+    if target_norm.startswith("multi-obj"):
+        return "scalar"
+
+    explicit_case = re.search(
+        r"\bCase\s+['\"]([^'\"]+)['\"]\s*\(\s*Object\s+Type\s*:",
+        trace_text, re.IGNORECASE,
+    )
+    if explicit_case and target_text.casefold() == explicit_case.group(1).casefold():
+        return "next_step_case"
+    return "next_step_history"
+
+
 def _set_reference(source_row: int, results_dir: Path) -> tuple[Any, str] | None:
     """Load a set reference from the full JSON first, then its per-query CSV."""
     index = source_row - 1  # workbook header is row 1; q001 corresponds to data row 2
@@ -96,7 +131,11 @@ def load_workbooks(dataset_dir: Path, files: list[str] | None = None,
                     if question is None or not str(question).strip():
                         continue
                     metadata = {str(header[i]): row[i] for i in range(min(len(header), len(row))) if header[i] is not None}
-                    category = str(get("category") or ("next_step" if get("object_type") else "generic"))
+                    raw_category = get("category")
+                    category = _infer_category(
+                        raw_category, get("object_type"), get("case_id"),
+                        get("trace"), str(question).strip(),
+                    )
                     expected = get("expected")
                     expected_source = f"{path.name}/{sheet.title}!{row_number}"
                     if (path.stem.casefold() == "queries_200_cleaned"
@@ -104,21 +143,6 @@ def load_workbooks(dataset_dir: Path, files: list[str] | None = None,
                         reference = _set_reference(row_number, results_dir)
                         if reference is not None:
                             expected, expected_source = reference
-                    if get("object_type") is not None and "object_type" in found:
-                        category = "next_step"
-                    elif category.strip().casefold() == "nsp":
-                        category = "next_step"
-                    if category == "next_step":
-                        target_id = str(get("case_id") or "").strip()
-                        trace_text = str(get("trace") or "")
-                        explicit_case = re.search(
-                            r"\bCase\s+['\"]([^'\"]+)['\"]\s*\(\s*Object\s+Type\s*:",
-                            trace_text, re.IGNORECASE,
-                        )
-                        if explicit_case and target_id.casefold() == explicit_case.group(1).casefold():
-                            category = "next_step_case"
-                        else:
-                            category = "next_step_history"
                     query_id = f"{path.stem}:{sheet.title}:{row_number}"
                     cases.append(QueryCase(query_id, path.name, sheet.title, row_number, category,
                                            str(question).strip(), expected, metadata, expected_source))

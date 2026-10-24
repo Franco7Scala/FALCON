@@ -1,5 +1,3 @@
-# Install the repository's existing requirements.txt first. These are the
-# additional dependencies for the comparative benchmark runner.
 openpyxl==3.1.5
 pandas>=2.2,<4
 duckdb>=1.1,<2

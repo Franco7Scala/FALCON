@@ -54,6 +54,7 @@ def esegui_agente_1_estrazione(state: PipelineState) -> dict:
     if (state.get("classificazione") == "IN_CONTESTO"
             and (state.get("informazioni_estratte") or "").startswith((
                 "TASK=NEXT_ACTIVITY_PREDICTION", "TASK=BOOLEAN_QUERY",
+                "TASK=RELATIONAL_QUERY",
             ))):
         return {
             "classificazione": state["classificazione"],
@@ -100,6 +101,7 @@ def esegui_agente_3(state: PipelineState) -> dict:
     risultato = esegui_e_valuta(
         state["richiesta_utente"], state["query_corrente"],
         task_info=state.get("informazioni_estratte"),
+        schema_database=state.get("schema_database"),
     )
 
     aggiornamento = \

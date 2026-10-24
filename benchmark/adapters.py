@@ -77,7 +77,7 @@ def run_orchestrator(case: QueryCase, database: Path | None = None, max_attempts
         state["schema_database"] += orchestrator_schema_guidance(database)
         specification = _nsp_specification(case)
         if not specification:
-            specification = _boolean_specification(case)
+            specification = _relational_specification(case)
         if specification:
             state["classificazione"] = "IN_CONTESTO"
             state["informazioni_estratte"] = specification
@@ -112,21 +112,26 @@ def _nsp_specification(case: QueryCase) -> str | None:
         return None
     case_id = _metadata_value(case, "Case ID / Target", "Case ID", "Target") if case.category == "next_step_case" else None
     objective = "CASE_SPECIFIC_NEXT_EVENT" if case.category == "next_step_case" else "MOST_FREQUENT_NEXT_ACTIVITY"
+    target = str(_metadata_value(case, "Case ID / Target", "Case ID", "Target") or "").casefold()
+    match_mode = "CURRENT_ACTIVITY" if case.category == "next_step_case" or target.startswith("pattern") else "FULL_PREFIX"
     return "\n".join((
         "TASK=NEXT_ACTIVITY_PREDICTION",
         f"OBJECTIVE={objective}",
+        f"MATCH_MODE={match_mode}",
         f"CASE_ID={case_id or 'NONE'}",
         f"OBJECT_TYPE={object_type}",
         f"PREFIX_JSON={json.dumps(prefix, ensure_ascii=False)}",
     ))
 
 
-def _boolean_specification(case: QueryCase) -> str | None:
-    """Pass workbook-declared boolean tasks to the pipeline without reclassification."""
-    if case.category.strip().casefold() != "boolean":
+def _relational_specification(case: QueryCase) -> str | None:
+    """Pass workbook-declared relational tasks without unreliable reclassification."""
+    category = case.category.strip().casefold()
+    if category not in {"boolean", "scalar", "set"}:
         return None
     request = json.dumps({"question": case.question}, ensure_ascii=False)
-    return f"TASK=BOOLEAN_QUERY\nREQUEST_JSON={request}"
+    task = "BOOLEAN_QUERY" if category == "boolean" else "RELATIONAL_QUERY"
+    return f"TASK={task}\nCATEGORY={category}\nREQUEST_JSON={request}"
 
 
 def _parse_expected(value: Any) -> Any:
@@ -277,14 +282,26 @@ class PM4PyLLMAdapter:
             spec = _nsp_specification(case)
             objective = "case-specific next event" if case.category == "next_step_case" else "most frequent next activity across matching traces"
             case_id = _metadata_value(case, "Case ID / Target", "Case ID", "Target") if case.category == "next_step_case" else None
+            match_mode = "CURRENT_ACTIVITY" if "MATCH_MODE=CURRENT_ACTIVITY" in (spec or "") else "FULL_PREFIX"
+            match_instruction = (
+                "Use only the final/current activity in the prefix as the match point; do not require earlier prefix activities. "
+                "Return the event immediately after that current activity."
+                if match_mode == "CURRENT_ACTIVITY" else
+                "Match the complete prefix consecutively, preserving order and repetitions, then return the immediately following event."
+            )
+            history_instruction = (
+                "For a historical task, group next activities after matching the current activity and return the most frequent."
+                if match_mode == "CURRENT_ACTIVITY" else
+                "For a historical task, group next activities after exact full-prefix matches and return the most frequent."
+            )
             question = (
                 f"Task: return the {objective}.\n"
                 f"Object type: {object_type}.\n"
                 f"Exact case ID: {case_id or 'not specified'}.\n"
                 f"Complete ordered trace prefix, including its final/current activity: {json.dumps(prefix, ensure_ascii=False)}.\n"
-                "Match this sequence consecutively anywhere in the case trace. Return only the activity immediately after the entire sequence. "
+                f"{match_instruction} Return only the requested activity. "
                 "For a case-specific task, filter to that exact case and do not aggregate. "
-                "For a historical task, group the next activities after exact prefix matches and return the most frequent. "
+                f"{history_instruction} "
                 f"Use only the provided event-log columns.\nStructured fields:\n{spec}\nOriginal question: " + case.question
             )
             columns = ", ".join(repr(column) for column in frame.columns)
@@ -292,24 +309,50 @@ class PM4PyLLMAdapter:
             # execute_query=True uses PM4Py's own SQL safety validation and DuckDB path.
             original_executor = self._local_executor
             self._last_sql = None
+            data = None
+            last_error = None
+            last_failed_sql = None
+            for attempt in range(1, self.max_attempts + 1):
+                out["attempts"] = attempt
+                self._last_sql = None
 
-            def duckdb_executor(prompt: str, **kwargs) -> str:
-                prompt += (f"\nActual DataFrame columns: {columns}. Actual dtypes: {dtypes}. "
-                           "SQL dialect: DuckDB. Use only those exact columns; do not invent org:resource or any other attribute. "
-                           "Quote column names containing colons with double quotes. Use ROW_NUMBER/LEAD for sequence position. "
-                           "Do not use LISTAGG or LIST_AGG; use only GROUP BY and COUNT for historical frequency. "
-                           "For an exact case return one next activity without aggregation. Do not emit SQL comments; "
-                           "return one read-only query.")
-                generated = original_executor(prompt, **kwargs)
-                self._last_sql = generated.strip()
-                return generated
+                def duckdb_executor(prompt: str, **kwargs) -> str:
+                    prompt += (f"\nActual DataFrame columns: {columns}. Actual dtypes: {dtypes}. "
+                               "SQL dialect: DuckDB. Use only those exact columns; do not invent org:resource or any other attribute. "
+                               "Quote column names containing colons with double quotes. "
+                               "Build an ordered_events CTE with ROW_NUMBER() PARTITION BY case ID and ORDER BY timestamp, event ID. "
+                               "Do not put window functions in WHERE or HAVING; filter their aliases in an outer CTE. "
+                               "Match every prefix activity at consecutive positions using self-joins on case ID and position. "
+                               "For an exact case, filter to that case and return its next activity without aggregation. "
+                               "For history, group only the next activity after a full prefix match and order by count descending, activity ascending. "
+                               "Return one next-activity column. Do not use LISTAGG/LIST_AGG or SQL comments; return one read-only query.")
+                    if last_error:
+                        prompt += (f"\nThe previous SQL was:\n{last_failed_sql}\n"
+                                   f"DuckDB rejected it with: {last_error}\n"
+                                   "Correct that specific error. Do not repeat the previous query unchanged.")
+                    generated = original_executor(prompt, **kwargs)
+                    self._last_sql = generated.strip()
+                    return generated
 
-            data = pm4py.llm.nlp_to_log_query(
-                frame, question, executor=duckdb_executor,
-                obtain_query=True, execute_query=True,
-            )
-            if not hasattr(data, "to_dict"):
-                raise ValueError("PM4Py did not return the documented DataFrame query result")
+                try:
+                    data = pm4py.llm.nlp_to_log_query(
+                        frame, question, executor=duckdb_executor,
+                        obtain_query=True, execute_query=True,
+                    )
+                    if not hasattr(data, "to_dict"):
+                        raise ValueError("PM4Py did not return the documented DataFrame query result")
+                    if len(data.columns) != 1:
+                        raise ValueError("Next-step query must return exactly one activity column")
+                    last_error = None
+                    break
+                except Exception as exc:
+                    last_error = f"{type(exc).__name__}: {exc}"
+                    last_failed_sql = self._last_sql
+                    data = None
+            if data is None:
+                raise RuntimeError(
+                    f"PM4Py/DuckDB query failed after {self.max_attempts} attempts: {last_error}"
+                )
             out.update(result=data.to_dict(orient="records"), sql=self._last_sql, status="success")
             out["note"] = "SQL generation used the project's local Qwen model; PM4Py validated and executed it on the DataFrame. PM4Py returns the result DataFrame, not the generated SQL string."
         except Exception as exc:

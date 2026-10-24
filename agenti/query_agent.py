@@ -45,6 +45,8 @@ def _query_nsp_strutturata(informazioni: str, schema: str) -> Optional[str]:
     objective = fields["OBJECTIVE"]
     case_id = fields["CASE_ID"]
     object_type = fields["OBJECT_TYPE"]
+    mode_match = re.search(r"(?m)^MATCH_MODE=(CURRENT_ACTIVITY|FULL_PREFIX)$", informazioni)
+    match_mode = mode_match.group(1) if mode_match else "FULL_PREFIX"
     try:
         prefix = json.loads(fields["PREFIX_JSON"])
     except (ValueError, TypeError) as exc:
@@ -91,19 +93,28 @@ ordered_events AS (
     WHERE COALESCE(om.ocel_type_map, o.ocel_type) = {quote(object_type)}{case_filter}
 )'''
 
-    joins = []
-    for position, activity in enumerate(prefix[1:], start=1):
-        joins.append(
-            f"JOIN ordered_events AS p{position} ON p{position}.case_id = p0.case_id "
-            f"AND p{position}.pos = p0.pos + {position} "
-            f"AND p{position}.activity = {quote(activity)}"
+    if match_mode == "CURRENT_ACTIVITY":
+        current_activity = prefix[-1]
+        match = (
+            "matching_starts AS (SELECT p0.case_id, p0.pos AS start_pos "
+            "FROM ordered_events AS p0 "
+            f"WHERE p0.activity = {quote(current_activity)})"
         )
-    match = (
-        "matching_starts AS (SELECT p0.case_id, p0.pos AS start_pos "
-        "FROM ordered_events AS p0 " + " ".join(joins) +
-        f" WHERE p0.activity = {quote(prefix[0])})"
-    )
-    next_pos = len(prefix)
+        next_pos = 1
+    else:
+        joins = []
+        for position, activity in enumerate(prefix[1:], start=1):
+            joins.append(
+                f"JOIN ordered_events AS p{position} ON p{position}.case_id = p0.case_id "
+                f"AND p{position}.pos = p0.pos + {position} "
+                f"AND p{position}.activity = {quote(activity)}"
+            )
+        match = (
+            "matching_starts AS (SELECT p0.case_id, p0.pos AS start_pos "
+            "FROM ordered_events AS p0 " + " ".join(joins) +
+            f" WHERE p0.activity = {quote(prefix[0])})"
+        )
+        next_pos = len(prefix)
     if objective == "CASE_SPECIFIC_NEXT_EVENT":
         tail = (
             "SELECT next_event.activity AS activity "
@@ -163,6 +174,70 @@ Do not return matching records, a raw count, multiple columns, or an empty resul
 Use only the tables, columns, and mapped values in the supplied schema. For event or object labels, consult the mapping tables when the raw OCEL type differs from the label in the question. Event timestamps live in event_<type> tables as ocel_time and join to event by ocel_id; event.ocel_time does not exist. For temporal comparisons, compare the relevant events on the same object/case and use their timestamps, rather than joining unrelated event rows.
 
 The question is in Italian. Interpret Italian numeric notation carefully: in a quantity/count context, a dot followed by groups of three digits (for example 2.000 or 1.500 unità) is a thousands separator, so use 2000 or 1500. A decimal fraction such as 0.5 hours remains a decimal. Preserve comparison operators and units exactly as asked.
+
+Database schema:
+{schema}
+
+Question:
+{question}
+{repair}
+'''
+    return _pulisci_query(LLM.invoke(prompt))
+
+
+def _query_relazionale_strutturata(
+    informazioni: str,
+    schema: str,
+    query_precedente: Optional[str] = None,
+    feedback: Optional[str] = None,
+) -> Optional[str]:
+    """Generate scalar/set SQL for workbook tasks without free-form reclassification."""
+    if not informazioni.startswith("TASK=RELATIONAL_QUERY"):
+        return None
+    category_match = re.search(r"(?m)^CATEGORY=(scalar|set)$", informazioni)
+    request_match = re.search(r"(?m)^REQUEST_JSON=(.*)$", informazioni)
+    if not category_match or not request_match:
+        raise ValueError("Structured relational request is missing CATEGORY or REQUEST_JSON")
+    category = category_match.group(1)
+    try:
+        request = json.loads(request_match.group(1))
+    except (ValueError, TypeError) as exc:
+        raise ValueError("Structured relational request is not valid JSON") from exc
+    question = request.get("question")
+    if not isinstance(question, str) or not question.strip():
+        raise ValueError("Structured relational request has no question")
+
+    repair = ""
+    if query_precedente:
+        repair = f"""
+
+Previous SQL:
+{query_precedente}
+
+Validation feedback:
+{feedback or "The previous query did not satisfy the requested result shape or semantics."}
+
+Repair the reported issue and return a complete replacement query.
+"""
+    if category == "set":
+        result_contract = (
+            "Return exactly the requested columns and rows. Preserve filters and "
+            "ordering when requested; do not aggregate unless the question asks for it. "
+            "Do not use SELECT * unless all columns are explicitly requested."
+        )
+    else:
+        result_contract = (
+            "Return exactly one row and one column containing the requested scalar value. "
+            "Use the requested aggregation; do not return the underlying matching records."
+        )
+    prompt = f'''You are a SQLite text-to-SQL system for an OCEL process database.
+Return exactly one executable, read-only SQLite SELECT query and nothing else.
+Task category: {category}.
+Result contract: {result_contract}
+
+Use only tables, columns, and mapped values in the supplied schema. Resolve event and object labels through event_map_type and object_map_type when mapped labels differ from raw OCEL types. Event timestamps are stored in event_<type> tables as ocel_time and joined to event by ocel_id; event.ocel_time does not exist. Compare event times for the same object/case when the question describes a sequence or temporal relation. Do not create Cartesian joins to compare counts; use scalar subqueries or CTEs.
+
+Interpret Italian quantities carefully: a dot followed by groups of three digits in a count/quantity (e.g. 2.000) is a thousands separator; decimal fractions such as 0.5 remain decimals.
 
 Database schema:
 {schema}
@@ -426,6 +501,13 @@ def genera_query(
     if boolean_query is not None:
         print("Structured boolean SQL generated with a one-cell SI/NO contract.")
         return boolean_query
+
+    relational_query = _query_relazionale_strutturata(
+        informazioni_estratte, schema_database, query_precedente, feedback,
+    )
+    if relational_query is not None:
+        print("Structured scalar/set SQL generated from workbook task category.")
+        return relational_query
 
     structured_query = _query_nsp_strutturata(informazioni_estratte, schema_database)
     if structured_query is not None:

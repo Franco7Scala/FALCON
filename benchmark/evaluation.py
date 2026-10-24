@@ -16,6 +16,17 @@ def parse_cell(value: Any) -> Any:
             try:
                 return ast.literal_eval(text)
             except (ValueError, SyntaxError):
+                if "\n" in text:
+                    parsed_rows = []
+                    try:
+                        for line in text.splitlines():
+                            line = line.strip()
+                            if line:
+                                parsed_rows.append(ast.literal_eval(line))
+                        if parsed_rows:
+                            return parsed_rows
+                    except (ValueError, SyntaxError):
+                        pass
                 if text.casefold() == "null":
                     return None
                 if text.casefold() in {"true", "false"}:
@@ -46,6 +57,10 @@ def _as_set_rows(value: Any) -> tuple[Any, ...]:
     value = parse_cell(value)
     if value is None:
         return ()
+    if isinstance(value, str) and value.strip().casefold() in {
+        "nessun risultato", "[nessun risultato]", "no result", "[no result]",
+    }:
+        return ()
     if not isinstance(value, (list, tuple)):
         rows = [(value,)]
     elif not value:
@@ -54,6 +69,10 @@ def _as_set_rows(value: Any) -> tuple[Any, ...]:
         rows = [tuple(row.values()) for row in value]
     elif all(isinstance(row, (list, tuple)) for row in value):
         rows = [tuple(row) for row in value]
+    elif isinstance(value, tuple):
+        # A literal tuple in the workbook represents one SQL row, not a set
+        # of unrelated one-cell rows.
+        rows = [tuple(value)]
     else:
         rows = [(item,) for item in value]
     canonical_rows = [tuple(_canonical(cell) for cell in row) for row in rows]

@@ -16,7 +16,18 @@ def _schema_text(database: Path) -> str:
             "SELECT name, sql FROM sqlite_master "
             "WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
         ).fetchall()
-    return "\n\n".join(sql for _, sql in rows if sql)
+        event_mappings = con.execute(
+            'SELECT ocel_type, ocel_type_map FROM event_map_type ORDER BY ocel_type_map'
+        ).fetchall()
+        object_mappings = con.execute(
+            'SELECT ocel_type, ocel_type_map FROM object_map_type ORDER BY ocel_type_map'
+        ).fetchall()
+    return "\n\n".join(sql for _, sql in rows if sql) + (
+        "\n\nACTIVITY TYPE MAPPINGS (raw ocel_type -> mapped label):\n"
+        + "\n".join(f"{raw!r} -> {mapped!r}" for raw, mapped in event_mappings)
+        + "\n\nOBJECT TYPE MAPPINGS (raw ocel_type -> mapped label):\n"
+        + "\n".join(f"{raw!r} -> {mapped!r}" for raw, mapped in object_mappings)
+    )
 
 
 def _clean_sql(output: Any) -> str:
@@ -24,9 +35,15 @@ def _clean_sql(output: Any) -> str:
     if isinstance(text, list):
         text = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in text)
     text = str(text).strip().lstrip("\ufeff")
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.IGNORECASE | re.DOTALL).strip()
     fence = re.search(r"```(?:sql)?\s*(.*?)```", text, re.IGNORECASE | re.DOTALL)
     if fence:
         text = fence.group(1).strip()
+    else:
+        # Recover a truncated/open code fence instead of passing backticks to SQLite.
+        text = re.sub(r"^```(?:sql)?\s*", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"```\s*$", "", text).strip()
+    text = text.replace("```", "").strip()
     if not re.match(r"^(SELECT|WITH)\b", text, re.IGNORECASE):
         match = re.search(r"\b(SELECT|WITH)\b", text, re.IGNORECASE)
         if not match:
@@ -94,6 +111,7 @@ OCEL schema facts:
 - Object-object links are in object_object(ocel_source_id, ocel_target_id, ocel_qualifier).
 - Event time is in the event_<type> tables in ocel_time, joined to event by ocel_id.
 - Mapped labels are available through event_map_type and object_map_type.
+- The schema appendix lists the exact raw-to-mapped labels. Do not compare a mapped activity label directly to event.ocel_type if the raw value is different; use event_map_type.ocel_type_map or the matching raw value.
 - Do not assume event.ocel_time exists.
 - For Italian quantities/counts, a dot followed by groups of three digits is a thousands separator (2.000 means 2000); decimal fractions such as 0.5 remain decimals.
 - For temporal relations, compare event timestamps for the same object/case using event_<type>.ocel_time; do not join unrelated events only by event ID.
