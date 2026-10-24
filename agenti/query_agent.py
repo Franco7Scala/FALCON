@@ -223,29 +223,35 @@ Repair the reported issue and return a complete replacement query.
         result_contract = (
             "Return exactly the requested columns and rows. Preserve filters and "
             "ordering when requested; do not aggregate unless the question asks for it. "
+            "Use ORDER BY ... LIMIT K if a Top-K or Bottom-K is requested. "
             "Do not use SELECT * unless all columns are explicitly requested."
         )
     else:
         result_contract = (
             "Return exactly one row and one column containing the requested scalar value. "
-            "Use the requested aggregation; do not return the underlying matching records."
+            "Use the requested aggregation (COUNT, AVG, MAX, SUM, etc.); do not return the underlying matching records."
         )
-    prompt = f'''You are a SQLite text-to-SQL system for an OCEL process database.
-Return exactly one executable, read-only SQLite SELECT query and nothing else.
-Task category: {category}.
-Result contract: {result_contract}
 
-Use only tables, columns, and mapped values in the supplied schema. Resolve event and object labels through event_map_type and object_map_type when mapped labels differ from raw OCEL types. Event timestamps are stored in event_<type> tables as ocel_time and joined to event by ocel_id; event.ocel_time does not exist. Compare event times for the same object/case when the question describes a sequence or temporal relation. Do not create Cartesian joins to compare counts; use scalar subqueries or CTEs.
+    prompt = f'''You are a SQLite text-to-SQL system for a process database.
+    Return exactly one executable, read-only SQLite SELECT query and nothing else.
+    Task category: {category}.
+    Result contract: {result_contract}
 
-Interpret Italian quantities carefully: a dot followed by groups of three digits in a count/quantity (e.g. 2.000) is a thousands separator; decimal fractions such as 0.5 remain decimals.
+    CRITICAL RULES:
+    1. Keep the query as simple and direct as possible. If the data can be extracted from a single specific table, query that table directly. Do NOT add redundant JOINs to generic, parent, or mapping tables unless strictly required by the question.
+    2. In SQLite, column types can be flexible. For numeric aggregations (SUM, AVG, MIN, MAX), always cast the target column to a numeric type (e.g., CAST(column_name AS REAL)) and explicitly exclude text literals (like 'null' strings) using: AND LOWER(CAST(column_name AS TEXT)) != 'null' AND CAST(column_name AS REAL) > 0.
+    3. Compare event times for the same entity/case when the question describes a sequence or temporal relation, using the timestamp columns explicitly defined in the schema.
+    4. Interpret quantities carefully: a dot followed by groups of three digits in a count/quantity (e.g. 2.000) is a thousands separator; use 2000. Decimal fractions such as 0.5 remain decimals.
 
-Database schema:
-{schema}
+    Database schema:
+    {schema}
 
-Question:
-{question}
-{repair}
-'''
+    Question:
+    {question}
+    
+    {repair}
+    '''
+
     return _pulisci_query(LLM.invoke(prompt))
 
 

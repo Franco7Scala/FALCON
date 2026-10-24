@@ -291,6 +291,13 @@ def get_prompt_valutazione_risultati():
             For requests other than next-activity prediction, check whether
             the query correctly applies the requested filters, columns,
             conditions, and aggregations.
+            
+            For SCALAR and SET relational queries:
+            - If the executed query accesses the correct tables and applies the correct aggregation/filtering, ACCEPT IT.
+            - DO NOT reject a query for missing JOINs to generic mapping or parent tables if it correctly extracts the requested data from a specific subtype table directly.
+            - Do not reject valid SQL simply because there is an alternative way to write it.
+            - If it is a scalar query, returns a single numeric result, and the logic aligns with the question, return ESITO: SODDISFATTA.
+            - If it is a set query asking for Top-K, verify it has an ORDER BY ... LIMIT clause and accept it.
 
             For a structured TASK=BOOLEAN_QUERY, the SQL must return exactly
             one row and one column with SI/NO or an equivalent boolean value.
