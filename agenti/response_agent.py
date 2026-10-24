@@ -191,21 +191,11 @@ def _controllo_booleano_statico(richiesta: str, query: str, schema: str) -> Opti
                     f"{expected_raw!r}, but its parent event row is filtered as {type_conditions!r}. "
                     "Join the event subtype table that matches the event type being compared.")
 
-    # A container weighing query must exclude other object types that can also
-    # participate in a Weigh event (e.g. forklift or truck).
-    if ("container" in question and re.search(r"\b(?:weigh|pesat)", question)
-            and "event_weigh" in sql
-            and not re.search(r"object_container|ocel_type\s*=\s*['\"]container['\"]", sql)):
-        return "The request is specifically about containers, but the Weigh events are not restricted to Container objects. Join the event_object link to object and filter its mapped/raw type using the schema."
-
-    # Cross-object temporal claims need an explicit relationship path.
-    cross_object = ("container" in question and "vehicle" in question
-                    and re.search(r"\b(?:depart|departure|partenz|ritard|delay)", question))
-    has_depart = "event_depart" in sql
-    linked_paths = ("object_object" in sql or
-                    len(re.findall(r"\bevent_object\s+\w+", sql)) >= 2)
-    if cross_object and has_depart and not linked_paths:
-        return "The query compares a container and a vehicle, but does not establish their relationship. Join both through event_object/object_object and correlate the shared event/object relationship before comparing timestamps."
+    object_subtype_aliases = set(re.findall(r"\bjoin\s+object_(\w+)\s+(\w+)", sql))
+    if len(object_subtype_aliases) >= 2:
+        linked_paths = ("object_object" in sql or len(re.findall(r"\bevent_object\s+", sql)) >= 2)
+        if not linked_paths:
+            return "The query compares multiple distinct object types, but does not establish their relationship. Join them through event_object or object_object to correlate the shared relationship."
 
     return None
 
@@ -298,6 +288,7 @@ def get_prompt_valutazione_risultati():
             - Do not reject valid SQL simply because there is an alternative way to write it.
             - If it is a scalar query, returns a single numeric result, and the logic aligns with the question, return ESITO: SODDISFATTA.
             - If it is a set query asking for Top-K, verify it has an ORDER BY ... LIMIT clause and accept it.
+            - For SET queries, if the question does not explicitly request a specific order, ignore the ordering of the returned rows when evaluating correctness.
 
             For a structured TASK=BOOLEAN_QUERY, the SQL must return exactly
             one row and one column with SI/NO or an equivalent boolean value.
