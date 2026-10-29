@@ -33,7 +33,7 @@ def _pulisci_query(testo: str) -> str:
 
 
 def _query_nsp_strutturata(informazioni: str, schema: str) -> Optional[str]:
-    """Build a safe positional next-step query from benchmark-provided fields."""
+    """Build positional next-step SQL for case, history, probability, and what-if tasks."""
     if not informazioni.startswith("TASK=NEXT_ACTIVITY_PREDICTION"):
         return None
     fields = {}
@@ -51,18 +51,73 @@ def _query_nsp_strutturata(informazioni: str, schema: str) -> Optional[str]:
         prefix = json.loads(fields["PREFIX_JSON"])
     except (ValueError, TypeError) as exc:
         raise ValueError("Structured NSP prefix is not valid JSON") from exc
-    if objective not in {"CASE_SPECIFIC_NEXT_EVENT", "MOST_FREQUENT_NEXT_ACTIVITY"}:
+    if objective not in {
+        "CASE_SPECIFIC_NEXT_EVENT", "MOST_FREQUENT_NEXT_ACTIVITY",
+        "NEXT_ACTIVITY_DISTRIBUTION", "WHAT_IF_NEXT_ACTIVITY",
+    }:
         raise ValueError(f"Unsupported structured NSP objective: {objective}")
     if not isinstance(prefix, list) or not prefix or any(not isinstance(x, str) or not x for x in prefix):
         raise ValueError("Structured NSP prefix must be a non-empty list of activity names")
     if objective == "CASE_SPECIFIC_NEXT_EVENT" and (not case_id or case_id.upper() == "NONE"):
         raise ValueError("Case-specific NSP requires an explicit case ID")
 
+    excluded_match = re.search(r"(?m)^EXCLUDE_ACTIVITY=(.*)$", informazioni)
+    excluded_activity = excluded_match.group(1).strip() if excluded_match else ""
+    if objective == "WHAT_IF_NEXT_ACTIVITY" and not excluded_activity:
+        raise ValueError("What-if NSP requires the nominal next activity to exclude")
+
     quote = lambda value: "'" + str(value).replace("'", "''") + "'"
+    activity_key = lambda value: re.sub(r"[^a-z0-9]", "", str(value).casefold())
+    quote_activity = lambda value: quote(activity_key(value))
+    filters_match = re.search(r"(?m)^FILTERS_JSON=(.*)$", informazioni)
+    try:
+        filters = json.loads(filters_match.group(1)) if filters_match else []
+    except (ValueError, TypeError) as exc:
+        raise ValueError("Structured NSP filters are not valid JSON") from exc
+    if not isinstance(filters, list):
+        raise ValueError("Structured NSP filters must be a JSON list")
+    object_table = re.sub(r"[^A-Za-z0-9_]", "", object_type)
+    if not object_table:
+        raise ValueError("Object type cannot be used to resolve object attributes")
+    object_conditions = []
+    for item in filters:
+        if not isinstance(item, dict):
+            raise ValueError("Each structured NSP filter must be a JSON object")
+        if item.get("kind") == "numeric":
+            column = item.get("column")
+            operator = item.get("operator")
+            value = item.get("value")
+            if column not in {"weight", "price"} or operator not in {">", ">=", "<", "<=", "="}:
+                raise ValueError("Unsupported numeric NSP filter")
+            try:
+                numeric_value = float(value)
+            except (TypeError, ValueError) as exc:
+                raise ValueError("Numeric NSP filter has an invalid value") from exc
+            object_conditions.append(
+                "EXISTS (SELECT 1 FROM \"object_" + object_table + "\" AS oa "
+                "WHERE oa.ocel_id = {case_ref} AND CAST(oa.\"" + column + "\" AS REAL) " + operator + " " + str(numeric_value) + ")"
+            )
+        elif item.get("kind") == "relation":
+            direction = item.get("direction")
+            value = quote(item.get("value", ""))
+            if direction == "source_is_value":
+                relation = f"rel.ocel_source_id = {value} AND rel.ocel_target_id = {{case_ref}}"
+            elif direction == "target_is_value":
+                relation = f"rel.ocel_source_id = {{case_ref}} AND rel.ocel_target_id = {value}"
+            else:
+                raise ValueError("Unsupported NSP object-relation filter")
+            object_conditions.append(f"EXISTS (SELECT 1 FROM object_object AS rel WHERE {relation})")
+        else:
+            raise ValueError("Unsupported structured NSP filter kind")
+
     if re.search(r"CREATE\s+TABLE\s+[\"`]?container_trace\b", schema, re.IGNORECASE):
-        case_filter = f" WHERE case_id = {quote(case_id)}" if objective == "CASE_SPECIFIC_NEXT_EVENT" else ""
+        conditions = []
+        if objective == "CASE_SPECIFIC_NEXT_EVENT":
+            conditions.append(f"case_id = {quote(case_id)}")
+        conditions.extend(condition.format(case_ref="container_trace.case_id") for condition in object_conditions)
+        case_filter = " WHERE " + " AND ".join(conditions) if conditions else ""
         ordered = (
-            "ordered_events AS (SELECT case_id, activity, step AS pos "
+            "ordered_events AS (SELECT case_id, LOWER(REPLACE(REPLACE(REPLACE(activity, ' ', ''), '_', ''), '-', '')) AS activity, step AS pos "
             f"FROM container_trace{case_filter})"
         )
     else:
@@ -76,11 +131,15 @@ def _query_nsp_strutturata(informazioni: str, schema: str) -> Optional[str]:
             f'SELECT ocel_id AS event_id, ocel_time AS timestamp FROM "event_{name}"'
             for name in mapped_types
         )
-        case_filter = f" AND eo.ocel_object_id = {quote(case_id)}" if objective == "CASE_SPECIFIC_NEXT_EVENT" else ""
+        conditions = []
+        if objective == "CASE_SPECIFIC_NEXT_EVENT":
+            conditions.append(f"eo.ocel_object_id = {quote(case_id)}")
+        conditions.extend(condition.format(case_ref="eo.ocel_object_id") for condition in object_conditions)
+        case_filter = " AND " + " AND ".join(conditions) if conditions else ""
         ordered = f'''event_times AS ({timestamp_union}),
 ordered_events AS (
     SELECT eo.ocel_object_id AS case_id,
-           COALESCE(em.ocel_type_map, e.ocel_type) AS activity,
+           LOWER(REPLACE(REPLACE(REPLACE(COALESCE(em.ocel_type_map, e.ocel_type), ' ', ''), '_', ''), '-', '')) AS activity,
            ROW_NUMBER() OVER (
                PARTITION BY eo.ocel_object_id ORDER BY et.timestamp, e.ocel_id
            ) AS pos
@@ -98,7 +157,7 @@ ordered_events AS (
         match = (
             "matching_starts AS (SELECT p0.case_id, p0.pos AS start_pos "
             "FROM ordered_events AS p0 "
-            f"WHERE p0.activity = {quote(current_activity)})"
+            f"WHERE p0.activity = {quote_activity(current_activity)})"
         )
         next_pos = 1
     else:
@@ -107,30 +166,34 @@ ordered_events AS (
             joins.append(
                 f"JOIN ordered_events AS p{position} ON p{position}.case_id = p0.case_id "
                 f"AND p{position}.pos = p0.pos + {position} "
-                f"AND p{position}.activity = {quote(activity)}"
+                f"AND p{position}.activity = {quote_activity(activity)}"
             )
         match = (
             "matching_starts AS (SELECT p0.case_id, p0.pos AS start_pos "
             "FROM ordered_events AS p0 " + " ".join(joins) +
-            f" WHERE p0.activity = {quote(prefix[0])})"
+            f" WHERE p0.activity = {quote_activity(prefix[0])})"
         )
         next_pos = len(prefix)
+    transitions = (
+        "next_transitions AS (SELECT m.case_id, m.start_pos, next_event.activity "
+        "FROM matching_starts AS m JOIN ordered_events AS next_event "
+        f"ON next_event.case_id = m.case_id AND next_event.pos = m.start_pos + {next_pos})"
+    )
     if objective == "CASE_SPECIFIC_NEXT_EVENT":
+        tail = "SELECT activity FROM next_transitions ORDER BY start_pos ASC LIMIT 1"
+    elif objective == "NEXT_ACTIVITY_DISTRIBUTION":
         tail = (
-            "SELECT next_event.activity AS activity "
-            "FROM matching_starts AS m JOIN ordered_events AS next_event "
-            "ON next_event.case_id = m.case_id AND next_event.pos = m.start_pos + "
-            f"{next_pos} ORDER BY m.start_pos DESC LIMIT 1"
+            "SELECT activity, COUNT(*) AS count, "
+            "ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS probability_percentage "
+            "FROM next_transitions GROUP BY activity ORDER BY count DESC, activity ASC"
         )
     else:
+        exclusion = f" WHERE activity <> {quote_activity(excluded_activity)}" if objective == "WHAT_IF_NEXT_ACTIVITY" else ""
         tail = (
-            "SELECT next_event.activity AS activity "
-            "FROM matching_starts AS m JOIN ordered_events AS next_event "
-            "ON next_event.case_id = m.case_id AND next_event.pos = m.start_pos + "
-            f"{next_pos} GROUP BY next_event.activity "
-            "ORDER BY COUNT(*) DESC, next_event.activity ASC LIMIT 1"
+            "SELECT activity FROM next_transitions" + exclusion +
+            " GROUP BY activity ORDER BY COUNT(*) DESC, activity ASC LIMIT 1"
         )
-    return f"WITH {ordered},\n{match}\n{tail};"
+    return f"WITH {ordered},\n{match},\n{transitions}\n{tail};"
 
 
 def _query_boolean_strutturata(
@@ -172,10 +235,63 @@ Use this result shape: SELECT CASE WHEN (<the exact requested proposition>) THEN
 Do not return matching records, a raw count, multiple columns, or an empty result when the question asks yes/no. Use EXISTS for existence questions. For comparisons between counts, calculate both counts in scalar subqueries and compare them; do not create a Cartesian join.
 
 Use only the tables, columns, and mapped values in the supplied schema. For event or object labels, consult the mapping tables when the raw OCEL type differs from the label in the question. Event timestamps live in event_<type> tables as ocel_time and join to event by ocel_id; event.ocel_time does not exist. For temporal comparisons, compare the relevant events on the same object/case and use their timestamps, rather than joining unrelated event rows.
+In OCEL, event.ocel_id and object.ocel_id belong to different ID domains: link them through event_object(ocel_event_id, ocel_object_id), never by equality-joining the two IDs. Link different objects through object_object and respect its source/target direction and qualifier.
+For missing-value questions, check SQL NULL and text sentinels such as 'null', 'none', or an empty string. Do not require ocel_changed_field to equal the attribute name unless the question asks about a specific change record; an object's attribute snapshot can contain its current value on a different row.
 
 The question is in Italian. Interpret Italian numeric notation carefully: in a quantity/count context, a dot followed by groups of three digits (for example 2.000 or 1.500 unità) is a thousands separator, so use 2000 or 1500. A decimal fraction such as 0.5 hours remains a decimal. Preserve comparison operators and units exactly as asked.
 
 Database schema:
+{schema}
+
+Question:
+{question}
+{repair}
+'''
+    return _pulisci_query(LLM.invoke(prompt))
+
+
+def _query_probability_strutturata(
+    informazioni: str,
+    schema: str,
+    query_precedente: Optional[str] = None,
+    feedback: Optional[str] = None,
+) -> Optional[str]:
+    """Generate probability SQL with the correct workbook result shape."""
+    if not informazioni.startswith("TASK=PROBABILITY_QUERY"):
+        return None
+    shape_match = re.search(r"(?m)^SHAPE=(numeric|distribution)$", informazioni)
+    request_match = re.search(r"(?m)^REQUEST_JSON=(.*)$", informazioni)
+    if not shape_match or not request_match:
+        raise ValueError("Structured probability request is missing SHAPE or REQUEST_JSON")
+    try:
+        request = json.loads(request_match.group(1))
+    except (ValueError, TypeError) as exc:
+        raise ValueError("Structured probability request is not valid JSON") from exc
+    question = request.get("question")
+    if not isinstance(question, str) or not question.strip():
+        raise ValueError("Structured probability request has no question")
+    if shape_match.group(1) == "numeric":
+        contract = (
+            "Return exactly one row with three numeric columns: numerator, denominator, probability_percentage. "
+            "The percentage is ROUND(numerator * 100.0 / denominator, 2)."
+        )
+    else:
+        contract = (
+            "Return the requested categorical distribution with exactly three columns: category_or_activity, count, probability_percentage. "
+            "Calculate each percentage over the eligible population stated in the question and round to two decimals."
+        )
+    repair = ""
+    if query_precedente:
+        repair = f"\nPrevious SQL:\n{query_precedente}\nValidation feedback:\n{feedback or 'Repair the probability query.'}\n"
+    prompt = f'''You are a SQLite text-to-SQL system for a process database.
+Return exactly one read-only SQLite SELECT query and nothing else.
+The SQL result shape is mandatory: {contract}
+Use the exact event, entity, population, and conditions requested. For object-level probabilities, count distinct objects where needed; do not count joined rows unless events are the stated denominator.
+For event ordering or time windows, construct timestamps from the correct event_<type> tables joined by ocel_id. event.ocel_time does not exist. Join temporal events through the same object/case where the question describes a lifecycle or sequence.
+For What-If questions, apply the stated hypothetical condition to the relevant population or event before calculating the probability; do not return the baseline probability unchanged unless the condition has no effect.
+Use only tables, columns, and mapped values in this schema.
+
+Schema:
 {schema}
 
 Question:
@@ -238,10 +354,14 @@ Repair the reported issue and return a complete replacement query.
     Result contract: {result_contract}
 
     CRITICAL RULES:
-    1. Keep the query as simple and direct as possible. If the data can be extracted from a single specific table, query that table directly. Do NOT add redundant JOINs to generic, parent, or mapping tables unless strictly required by the question.
-    2. In SQLite, column types can be flexible. For numeric aggregations (SUM, AVG, MIN, MAX), always cast the target column to a numeric type (e.g., CAST(column_name AS REAL)) and explicitly exclude text literals (like 'null' strings) using: AND LOWER(CAST(column_name AS TEXT)) != 'null' AND CAST(column_name AS REAL) > 0.
-    3. Compare event times for the same entity/case when the question describes a sequence or temporal relation, using the timestamp columns explicitly defined in the schema.
-    4. Interpret quantities carefully: a dot followed by groups of three digits in a count/quantity (e.g. 2.000) is a thousands separator; use 2000. Decimal fractions such as 0.5 remain decimals.
+    1. Keep the query simple, but use the correct OCEL relationships. Never join event.ocel_id directly to object.ocel_id. Use event_object for event-to-object links and object_object for object-to-object links.
+    2. Object subtype tables can contain multiple snapshot rows for the same ocel_id. For entity counts and lists, use COUNT(DISTINCT ocel_id) or SELECT DISTINCT. For a current attribute value, select the latest non-null value per object ordered by that subtype table's ocel_time; do not multiply entities by snapshot rows.
+    3. Do not treat event_object as a generic package/item containment table. Inspect its qualifier and use object_object with the relevant qualifier/direction for relationships among objects.
+    4. Event IDs and object IDs are distinct: use event.ocel_type to select event kinds and event_object.ocel_object_id to identify associated entities. Event subtype tables provide timestamps; event.ocel_time does not exist.
+    5. Cast text-valued numeric attributes before arithmetic. Exclude NULL or text sentinels ('null', 'none', '') only when they represent missing values. Never add a > 0 or >= 0 filter unless requested; zero can be a valid value.
+    6. For activity names shown in a result, prefer event_map_type.ocel_type (human-readable raw label) over the compact table suffix or ocel_type_map if the latter removes spaces.
+    7. Compare event times for the same entity/case when the question describes a sequence or temporal relation, using each event type's timestamp table.
+    8. Interpret quantities carefully: a dot followed by groups of three digits in a count/quantity (e.g. 2.000) is a thousands separator; use 2000. Decimal fractions such as 0.5 remain decimals.
 
     Database schema:
     {schema}
@@ -507,6 +627,13 @@ def genera_query(
     if boolean_query is not None:
         print("Structured boolean SQL generated with a one-cell SI/NO contract.")
         return boolean_query
+
+    probability_query = _query_probability_strutturata(
+        informazioni_estratte, schema_database, query_precedente, feedback,
+    )
+    if probability_query is not None:
+        print("Structured probability SQL generated with the workbook result shape.")
+        return probability_query
 
     relational_query = _query_relazionale_strutturata(
         informazioni_estratte, schema_database, query_precedente, feedback,

@@ -54,7 +54,7 @@ def esegui_agente_1_estrazione(state: PipelineState) -> dict:
     if (state.get("classificazione") == "IN_CONTESTO"
             and (state.get("informazioni_estratte") or "").startswith((
                 "TASK=NEXT_ACTIVITY_PREDICTION", "TASK=BOOLEAN_QUERY",
-                "TASK=RELATIONAL_QUERY",
+                "TASK=RELATIONAL_QUERY", "TASK=PROBABILITY_QUERY",
             ))):
         return {
             "classificazione": state["classificazione"],

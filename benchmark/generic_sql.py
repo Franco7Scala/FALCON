@@ -6,6 +6,7 @@ from typing import Any
 import re
 import sqlite3
 import time
+import ast
 
 from .ocel import connect_readonly
 
@@ -97,7 +98,36 @@ def run_generic_sql(case, database: Path, system: str, max_attempts: int = 3,
             "scalar": "Return one row and one value answering the numeric/text scalar question.",
             "boolean": "Return exactly one row and one column with 'SI' when the complete proposition is true, otherwise 'NO'. Use CASE WHEN/EXISTS or compare scalar subquery counts; never return a raw count, row list, or multiple columns.",
             "set": "Return all requested rows and columns. Preserve requested filters and ordering; do not aggregate unless the question asks for it.",
+            "next_step_case": "This is a case-specific next-activity prediction. Filter the exact object/case named in the question, follow its ordered trace, and return only the activity immediately after the described prefix as one row and one value. Do not aggregate across other objects.",
+            "next_step_history": "This is a historical next-activity prediction. Match the complete ordered prefix on the specified object type, then return the most frequent immediate next activity as one row and one value.",
+            "next_step_what_if": "This is a what-if next-activity prediction. Apply the hypothetical condition in the question, then return the requested alternative next activity as one row and one value.",
         }.get(case.category, "Answer the request using the relevant rows and columns.")
+        if case.category == "next_step_probability":
+            expected = case.expected
+            if isinstance(expected, str):
+                try:
+                    expected = ast.literal_eval(expected)
+                except (ValueError, SyntaxError):
+                    expected = None
+            rows = expected if isinstance(expected, (list, tuple)) else []
+            if rows and isinstance(rows[0], (list, tuple)) and len(rows[0]) >= 3:
+                first = rows[0][0]
+                if isinstance(first, str):
+                    task_guidance = (
+                        "Return a categorical probability distribution with the requested label, event, or person, its count, and its percentage. "
+                        "Use the exact denominator implied by the question, calculate percentages to two decimal places, and preserve all requested categories."
+                    )
+                else:
+                    task_guidance = (
+                        "Return exactly one row with three numeric columns: numerator (matching objects/events), denominator (eligible objects/events), "
+                        "and probability_percentage rounded to two decimals. Compute the probability as numerator * 100.0 / denominator. "
+                        "Apply all lifecycle, temporal, attribute, relationship, and What-If conditions in the question to the correct entity."
+                    )
+            else:
+                task_guidance = (
+                    "Answer the probability question with a numerator, denominator, and percentage when the expected result has that form. "
+                    "Use the exact population and event conditions stated in the question; do not substitute a next-activity distribution unless asked for one."
+                )
         base_prompt = f'''You are a SQLite text-to-SQL system for an OCEL logistics database.
 Generate exactly one read-only SQL query using only the schema below.
 Return SQL only, without prose or Markdown.

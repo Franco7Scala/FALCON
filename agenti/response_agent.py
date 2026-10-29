@@ -143,6 +143,40 @@ def _valore_booleano_sql(risultati: str):
     return None
 
 
+def _valida_forma_probabilita(risultati: str, shape: str) -> Optional[str]:
+    """Reject probability SQL that does not return the benchmark's declared shape."""
+    try:
+        value = ast.literal_eval(risultati)
+    except (ValueError, SyntaxError, MemoryError, RecursionError):
+        return "The probability query did not return a parseable tabular result."
+    if not isinstance(value, list) or not value:
+        return "The probability query must return at least one result row."
+    rows = [tuple(row) if isinstance(row, (list, tuple)) else (row,) for row in value]
+    if shape == "numeric":
+        if len(rows) != 1 or len(rows[0]) != 3:
+            return "Return one row with exactly numerator, denominator, and probability_percentage."
+        numerator, denominator, percentage = rows[0]
+        if any(not isinstance(number, (int, float)) or isinstance(number, bool)
+               for number in (numerator, denominator, percentage)):
+            return "The probability row must contain three numeric values: numerator, denominator, and percentage."
+        if denominator <= 0 or numerator < 0 or numerator > denominator:
+            return "The probability numerator and denominator are inconsistent; denominator must be positive and numerator between zero and denominator."
+        expected_percentage = round(numerator * 100.0 / denominator, 2)
+        if abs(float(percentage) - expected_percentage) > 0.011:
+            return "probability_percentage must equal ROUND(numerator * 100.0 / denominator, 2)."
+        return None
+    if any(len(row) != 3 or not isinstance(row[0], str)
+           or not isinstance(row[1], (int, float)) or isinstance(row[1], bool)
+           or not isinstance(row[2], (int, float)) or isinstance(row[2], bool)
+           for row in rows):
+        return "Return distribution rows with exactly category_or_activity, count, and probability_percentage."
+    if any(row[1] < 0 or row[2] < 0 or row[2] > 100 for row in rows):
+        return "Distribution counts must be non-negative and percentages must be between zero and 100."
+    if abs(sum(float(row[2]) for row in rows) - 100.0) > 0.11:
+        return "The returned probability percentages must sum to 100 (within rounding tolerance)."
+    return None
+
+
 def _controllo_booleano_statico(richiesta: str, query: str, schema: str) -> Optional[str]:
     """Catch common OCEL boolean SQL mistakes before accepting the LLM judge."""
     sql = re.sub(r"\s+", " ", query).casefold()
@@ -408,6 +442,24 @@ def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] 
                     "containing SI/NO (or a single equivalent 1/0 or true/false). "
                     "Do not return counts, record lists, multiple columns, or no rows."
                 ),
+            }
+
+    if (task_info or "").startswith("TASK=PROBABILITY_QUERY"):
+        shape_match = re.search(r"(?m)^SHAPE=(numeric|distribution)$", task_info or "")
+        if not shape_match:
+            return {
+                "valutazione": "DA_RIGENERARE",
+                "risultati_query": risultati,
+                "risposta_finale": None,
+                "feedback": "The structured probability request is missing its output shape.",
+            }
+        feedback_probability = _valida_forma_probabilita(risultati, shape_match.group(1))
+        if feedback_probability:
+            return {
+                "valutazione": "DA_RIGENERARE",
+                "risultati_query": risultati,
+                "risposta_finale": None,
+                "feedback": feedback_probability,
             }
         feedback_booleano = _controllo_booleano_statico(
             richiesta_utente, query, schema_database or ""

@@ -26,7 +26,7 @@ class QueryCase:
 ALIASES = {
     "question": {"query in natural language", "domanda", "question", "query in linguaggio naturale"},
     "expected": {"expected result", "risultato atteso"},
-    "category": {"type query", "nsp", "category", "tipo query"},
+    "category": {"type query", "query type", "nsp", "category", "tipo query"},
     "object_type": {"object type"},
     "case_id": {"case id / target", "case id", "target"},
     "trace": {"traccia / prefisso (case-based)", "trace / prefix", "trace prefix"},
@@ -39,28 +39,44 @@ def _norm(value: Any) -> str:
 
 
 def _infer_category(raw_category: Any, object_type: Any, target: Any,
-                    trace: Any, question: str) -> str:
+                    trace: Any, question: str, sql: Any = None) -> str:
     """Infer benchmark task type from explicit labels and NSP workbook metadata."""
     raw = _norm(raw_category)
     if raw in {"boolean", "scalar", "set"}:
         return raw
-    if object_type is None and raw not in {"nsp", "next_step"}:
-        return raw or "generic"
+    if raw in {"nsp-prob", "nsp_prob", "prob", "probability"}:
+        return "next_step_probability"
 
     target_text = str(target or "").strip()
     target_norm = _norm(target_text)
     question_norm = _norm(question)
+    sql_text = str(sql or "")
+
+    # Some generated workbooks put several NSP subtypes under `nextstep`.
+    # Keep activity prediction separate; only duration questions remain scalar.
+    if raw in {"nextstep", "next-step", "next step"}:
+        if ("what-if nsp" in target_norm or "what-if nsp" in question_norm
+                or "[what-if nsp]" in question_norm):
+            return "next_step_what_if"
+        if (re.search(r"\b(?:hours?|minutes?|days?)\b", question_norm)
+                and re.search(r"julianday|timestamp|next_ts", sql_text, re.IGNORECASE)):
+            return "scalar"
+        if re.search(r"\b(?:object_id|ocel_object_id)\s*=\s*['\"]", sql_text, re.IGNORECASE):
+            return "next_step_case"
+        return "next_step_history"
+
+    if object_type is None and raw not in {"nsp", "next_step"}:
+        return raw or "generic"
+
     trace_text = str(trace or "")
 
-    # Probability and transition-matrix rows contain one or more result tuples,
-    # so evaluate them as relational row sets rather than next-step labels.
+    # NSP probabilities and transition matrices have their own benchmark
+    # category even though their answer contains a set of rows.
     if ("global top-1" in target_norm or "matrix" in target_norm
             or "prob" in target_norm or "probabilit" in question_norm):
-        return "set"
-    # What-if NSP rows ask for a scenario-dependent activity, not an observed
-    # next event in the historical trace.
+        return "next_step_probability"
     if "what-if nsp" in target_norm or "what-if nsp" in question_norm:
-        return "scalar"
+        return "next_step_what_if"
     if target_norm.startswith("multi-obj"):
         return "scalar"
 
@@ -134,12 +150,13 @@ def load_workbooks(dataset_dir: Path, files: list[str] | None = None,
                     raw_category = get("category")
                     category = _infer_category(
                         raw_category, get("object_type"), get("case_id"),
-                        get("trace"), str(question).strip(),
+                        get("trace"), str(question).strip(), get("sql"),
                     )
                     expected = get("expected")
                     expected_source = f"{path.name}/{sheet.title}!{row_number}"
                     if (path.stem.casefold() == "queries_200_cleaned"
-                            and category.strip().casefold() == "set" and results_dir is not None):
+                            and category.strip().casefold() in {"set", "next_step_probability"}
+                            and results_dir is not None):
                         reference = _set_reference(row_number, results_dir)
                         if reference is not None:
                             expected, expected_source = reference
