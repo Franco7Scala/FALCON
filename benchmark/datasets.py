@@ -58,6 +58,14 @@ def _infer_category(raw_category: Any, object_type: Any, target: Any,
         if ("what-if nsp" in target_norm or "what-if nsp" in question_norm
                 or "[what-if nsp]" in question_norm):
             return "next_step_what_if"
+        # Distinguish probability questions about the *immediate next activity*
+        # from lifecycle probabilities that merely mention event names.
+        if (re.search(
+                r"probability distribution.{0,120}(?:next|following|immediately following).{0,80}activity",
+                question_norm,
+            )
+                or re.search(r"probability.{0,80}next event.{0,120}\bversus\b", question_norm)):
+            return "next_step_probability"
         if (re.search(r"\b(?:hours?|minutes?|days?)\b", question_norm)
                 and re.search(r"julianday|timestamp|next_ts", sql_text, re.IGNORECASE)):
             return "scalar"
