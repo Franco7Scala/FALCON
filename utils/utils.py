@@ -19,11 +19,11 @@ def get_pipeline(task, model, tokenizer, max_new_tokens=2048, do_sample=False, r
 
 # Initializes the LLM model
 @functools.lru_cache(maxsize=None)
-def crea_llm(model_name: str, carica_in_4bit: bool = False) -> ChatHuggingFace:
+def create_llm(model_name: str, load_in_4bit: bool = False) -> ChatHuggingFace:
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    if carica_in_4bit:
+    if load_in_4bit:
         quant_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_compute_dtype=torch.bfloat16,

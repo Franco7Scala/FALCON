@@ -238,7 +238,7 @@ def score(records: list[dict[str, Any]]) -> dict[str, Any]:
         "unsupported": sum(r["status"] == "unsupported" for r in records),
         "out_of_scope": sum(r["status"] == "out_of_scope" for r in records),
         "out_of_context": sum(r["status"] == "out_of_context" for r in records),
-        "pipeline_rejected_after_execution": sum(r.get("agent_decision") not in (None, "SODDISFATTA") and r["status"] == "success" for r in records),
+        "pipeline_rejected_after_execution": sum(r.get("agent_decision") not in (None, "SATISFIED") and r["status"] == "success" for r in records),
         "not_evaluable": sum(r["correct"] is None and r["status"] == "success" for r in records),
     }
 

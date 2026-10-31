@@ -4,48 +4,48 @@ import json
 import re
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from utils.utils import crea_llm
+from utils.utils import create_llm
 
 # "Qwen/Qwen3-Coder-30B-A3B-Instruct"
 MODEL_NAME = "Qwen/Qwen3-Coder-30B-A3B-Instruct"
 
 
 # Utility: cleaning up the model output
-def _pulisci_query(testo: str) -> str:
+def _clean_query(text: str) -> str:
     """
     Removes a markdown code block (```sql ... ```) from the raw LLM output,
     if present, since the model might return one despite the prompt
     instructions.
     """
-    testo = getattr(testo, "content", testo)
-    if isinstance(testo, list):
-        testo = "".join(
+    text = getattr(text, "content", text)
+    if isinstance(text, list):
+        text = "".join(
             part.get("text", "") if isinstance(part, dict) else str(part)
-            for part in testo
+            for part in text
         )
-    testo = str(testo).strip()
-    if "```" in testo:
-        righe = testo.split("\n")
-        righe = righe[1:] if len(righe) > 1 else righe
-        testo = "\n".join(righe)
-        testo = testo.rsplit("```", 1)[0]
-    return testo.strip()
+    text = str(text).strip()
+    if "```" in text:
+        rows = text.split("\n")
+        rows = rows[1:] if len(rows) > 1 else rows
+        text = "\n".join(rows)
+        text = text.rsplit("```", 1)[0]
+    return text.strip()
 
 
-def _query_nsp_strutturata(informazioni: str, schema: str) -> Optional[str]:
+def _build_structured_nsp_query(information: str, schema: str) -> Optional[str]:
     """Build positional next-step SQL for case, history, probability, and what-if tasks."""
-    if not informazioni.startswith("TASK=NEXT_ACTIVITY_PREDICTION"):
+    if not information.startswith("TASK=NEXT_ACTIVITY_PREDICTION"):
         return None
     fields = {}
     for key in ("OBJECTIVE", "CASE_ID", "OBJECT_TYPE", "PREFIX_JSON"):
-        match = re.search(rf"(?m)^{key}=(.*)$", informazioni)
+        match = re.search(rf"(?m)^{key}=(.*)$", information)
         if not match:
             raise ValueError(f"Structured NSP request is missing {key}")
         fields[key] = match.group(1).strip()
     objective = fields["OBJECTIVE"]
     case_id = fields["CASE_ID"]
     object_type = fields["OBJECT_TYPE"]
-    mode_match = re.search(r"(?m)^MATCH_MODE=(CURRENT_ACTIVITY|FULL_PREFIX)$", informazioni)
+    mode_match = re.search(r"(?m)^MATCH_MODE=(CURRENT_ACTIVITY|FULL_PREFIX)$", information)
     match_mode = mode_match.group(1) if mode_match else "FULL_PREFIX"
     try:
         prefix = json.loads(fields["PREFIX_JSON"])
@@ -61,7 +61,7 @@ def _query_nsp_strutturata(informazioni: str, schema: str) -> Optional[str]:
     if objective == "CASE_SPECIFIC_NEXT_EVENT" and (not case_id or case_id.upper() == "NONE"):
         raise ValueError("Case-specific NSP requires an explicit case ID")
 
-    excluded_match = re.search(r"(?m)^EXCLUDE_ACTIVITY=(.*)$", informazioni)
+    excluded_match = re.search(r"(?m)^EXCLUDE_ACTIVITY=(.*)$", information)
     excluded_activity = excluded_match.group(1).strip() if excluded_match else ""
     if objective == "WHAT_IF_NEXT_ACTIVITY" and not excluded_activity:
         raise ValueError("What-if NSP requires the nominal next activity to exclude")
@@ -69,7 +69,7 @@ def _query_nsp_strutturata(informazioni: str, schema: str) -> Optional[str]:
     quote = lambda value: "'" + str(value).replace("'", "''") + "'"
     activity_key = lambda value: re.sub(r"[^a-z0-9]", "", str(value).casefold())
     quote_activity = lambda value: quote(activity_key(value))
-    filters_match = re.search(r"(?m)^FILTERS_JSON=(.*)$", informazioni)
+    filters_match = re.search(r"(?m)^FILTERS_JSON=(.*)$", information)
     try:
         filters = json.loads(filters_match.group(1)) if filters_match else []
     except (ValueError, TypeError) as exc:
@@ -196,16 +196,16 @@ ordered_events AS (
     return f"WITH {ordered},\n{match},\n{transitions}\n{tail};"
 
 
-def _query_boolean_strutturata(
-    informazioni: str,
+def _build_structured_boolean_query(
+    information: str,
     schema: str,
-    query_precedente: Optional[str] = None,
+    previous_query: Optional[str] = None,
     feedback: Optional[str] = None,
 ) -> Optional[str]:
     """Generate yes/no SQL under a dedicated contract for benchmark boolean rows."""
-    if not informazioni.startswith("TASK=BOOLEAN_QUERY"):
+    if not information.startswith("TASK=BOOLEAN_QUERY"):
         return None
-    match = re.search(r"(?m)^REQUEST_JSON=(.*)$", informazioni)
+    match = re.search(r"(?m)^REQUEST_JSON=(.*)$", information)
     if not match:
         raise ValueError("Structured boolean request is missing REQUEST_JSON")
     try:
@@ -217,11 +217,11 @@ def _query_boolean_strutturata(
         raise ValueError("Structured boolean request has no question")
 
     repair = ""
-    if query_precedente:
+    if previous_query:
         repair = f"""
 
 Previous SQL:
-{query_precedente}
+{previous_query}
 
 Validation feedback:
 {feedback or "The prior result did not satisfy the required one-cell boolean contract."}
@@ -247,20 +247,20 @@ Question:
 {question}
 {repair}
 '''
-    return _pulisci_query(LLM.invoke(prompt))
+    return _clean_query(LLM.invoke(prompt))
 
 
-def _query_probability_strutturata(
-    informazioni: str,
+def _build_structured_probability_query(
+    information: str,
     schema: str,
-    query_precedente: Optional[str] = None,
+    previous_query: Optional[str] = None,
     feedback: Optional[str] = None,
 ) -> Optional[str]:
     """Generate probability SQL with the correct workbook result shape."""
-    if not informazioni.startswith("TASK=PROBABILITY_QUERY"):
+    if not information.startswith("TASK=PROBABILITY_QUERY"):
         return None
-    shape_match = re.search(r"(?m)^SHAPE=(numeric|distribution)$", informazioni)
-    request_match = re.search(r"(?m)^REQUEST_JSON=(.*)$", informazioni)
+    shape_match = re.search(r"(?m)^SHAPE=(numeric|distribution)$", information)
+    request_match = re.search(r"(?m)^REQUEST_JSON=(.*)$", information)
     if not shape_match or not request_match:
         raise ValueError("Structured probability request is missing SHAPE or REQUEST_JSON")
     try:
@@ -281,8 +281,8 @@ def _query_probability_strutturata(
             "Calculate each percentage over the eligible population stated in the question and round to two decimals."
         )
     repair = ""
-    if query_precedente:
-        repair = f"\nPrevious SQL:\n{query_precedente}\nValidation feedback:\n{feedback or 'Repair the probability query.'}\n"
+    if previous_query:
+        repair = f"\nPrevious SQL:\n{previous_query}\nValidation feedback:\n{feedback or 'Repair the probability query.'}\n"
     prompt = f'''You are a SQLite text-to-SQL system for a process database.
 Return exactly one read-only SQLite SELECT query and nothing else.
 The SQL result shape is mandatory: {contract}
@@ -298,20 +298,20 @@ Question:
 {question}
 {repair}
 '''
-    return _pulisci_query(LLM.invoke(prompt))
+    return _clean_query(LLM.invoke(prompt))
 
 
-def _query_relazionale_strutturata(
-    informazioni: str,
+def _build_structured_relational_query(
+    information: str,
     schema: str,
-    query_precedente: Optional[str] = None,
+    previous_query: Optional[str] = None,
     feedback: Optional[str] = None,
 ) -> Optional[str]:
     """Generate scalar/set SQL for workbook tasks without free-form reclassification."""
-    if not informazioni.startswith("TASK=RELATIONAL_QUERY"):
+    if not information.startswith("TASK=RELATIONAL_QUERY"):
         return None
-    category_match = re.search(r"(?m)^CATEGORY=(scalar|set)$", informazioni)
-    request_match = re.search(r"(?m)^REQUEST_JSON=(.*)$", informazioni)
+    category_match = re.search(r"(?m)^CATEGORY=(scalar|set)$", information)
+    request_match = re.search(r"(?m)^REQUEST_JSON=(.*)$", information)
     if not category_match or not request_match:
         raise ValueError("Structured relational request is missing CATEGORY or REQUEST_JSON")
     category = category_match.group(1)
@@ -324,11 +324,11 @@ def _query_relazionale_strutturata(
         raise ValueError("Structured relational request has no question")
 
     repair = ""
-    if query_precedente:
+    if previous_query:
         repair = f"""
 
 Previous SQL:
-{query_precedente}
+{previous_query}
 
 Validation feedback:
 {feedback or "The previous query did not satisfy the requested result shape or semantics."}
@@ -372,12 +372,12 @@ Repair the reported issue and return a complete replacement query.
     {repair}
     '''
 
-    return _pulisci_query(LLM.invoke(prompt))
+    return _clean_query(LLM.invoke(prompt))
 
 
 # Prompts: one for a first generation, one for a correction round
 
-def get_prompt_generazione():
+def get_generation_prompt():
     return ChatPromptTemplate.from_messages([
         (
             "system",
@@ -497,7 +497,7 @@ def get_prompt_generazione():
             {schema}
 
             Information extracted from the user's request:
-            {informazioni_estratte}
+            {extracted_information}
 
             Generate the SQL query for the extracted task.
             """
@@ -505,7 +505,7 @@ def get_prompt_generazione():
     ])
 
 
-def get_prompt_correzione():
+def get_correction_prompt():
     return ChatPromptTemplate.from_messages([
         (
             "system",
@@ -593,10 +593,10 @@ def get_prompt_correzione():
             {schema}
 
             Extracted information:
-            {informazioni_estratte}
+            {extracted_information}
 
             Previous SQL query:
-            {query_precedente}
+            {previous_query}
 
             Validation feedback:
             {feedback}
@@ -608,67 +608,67 @@ def get_prompt_correzione():
 
 
 
-# genera_query: the only function this module exposes
-def genera_query(
-    informazioni_estratte: str,
-    schema_database: str,
-    query_precedente: Optional[str] = None,
+# Main query-generation entry point exposed by this module.
+def generate_query(
+    extracted_information: str,
+    database_schema: str,
+    previous_query: Optional[str] = None,
     feedback: Optional[str] = None,
 ) -> str:
     """
-    Generates a SQL query from the extracted information. If query_precedente
+    Generates a SQL query from the extracted information. If previous_query
     is given (i.e. the pipeline is asking for a revision after Agent 1
     rejected a previous attempt), the previous query and Agent 1's feedback
     are used to produce a corrected query instead of generating from scratch.
     """
-    boolean_query = _query_boolean_strutturata(
-        informazioni_estratte, schema_database, query_precedente, feedback,
+    boolean_query = _build_structured_boolean_query(
+        extracted_information, database_schema, previous_query, feedback,
     )
     if boolean_query is not None:
         print("Structured boolean SQL generated with a one-cell SI/NO contract.")
         return boolean_query
 
-    probability_query = _query_probability_strutturata(
-        informazioni_estratte, schema_database, query_precedente, feedback,
+    probability_query = _build_structured_probability_query(
+        extracted_information, database_schema, previous_query, feedback,
     )
     if probability_query is not None:
         print("Structured probability SQL generated with the workbook result shape.")
         return probability_query
 
-    relational_query = _query_relazionale_strutturata(
-        informazioni_estratte, schema_database, query_precedente, feedback,
+    relational_query = _build_structured_relational_query(
+        extracted_information, database_schema, previous_query, feedback,
     )
     if relational_query is not None:
         print("Structured scalar/set SQL generated from workbook task category.")
         return relational_query
 
-    structured_query = _query_nsp_strutturata(informazioni_estratte, schema_database)
+    structured_query = _build_structured_nsp_query(extracted_information, database_schema)
     if structured_query is not None:
         print("Structured NSP query generated from workbook task fields.")
         return structured_query
 
     print("\n========== SQL CORRECTION DEBUG ==========")
     print("Previous query:")
-    print(query_precedente)
+    print(previous_query)
 
     print("\nFeedback received by Agent 2:")
     print(feedback)
 
     print("==========================================\n")
 
-    if query_precedente is None:
+    if previous_query is None:
         output_grezzo = CHAIN_GENERAZIONE.invoke(
             {
-                "schema": schema_database,
-                "informazioni_estratte": informazioni_estratte,
+                "schema": database_schema,
+                "extracted_information": extracted_information,
             }
         )
     else:
         output_grezzo = CHAIN_CORREZIONE.invoke(
             {
-                "schema": schema_database,
-                "informazioni_estratte": informazioni_estratte,
-                "query_precedente": query_precedente,
+                "schema": database_schema,
+                "extracted_information": extracted_information,
+                "previous_query": previous_query,
                 "feedback": feedback or "",
             }
         )
@@ -678,7 +678,7 @@ def genera_query(
     print("Raw LLM output:")
     print(output_grezzo)
 
-    query_finale = _pulisci_query(output_grezzo)
+    query_finale = _clean_query(output_grezzo)
 
     # Debug: show the final query after cleaning
     print("\nCleaned SQL query:")
@@ -691,7 +691,7 @@ def genera_query(
 
     print(
         "Query unchanged:",
-        query_finale.strip() == (query_precedente or "").strip()
+        query_finale.strip() == (previous_query or "").strip()
     )
     print("==========================================\n")
 
@@ -699,10 +699,10 @@ def genera_query(
 
 
 # Initialization of model, prompts and chains
-LLM = crea_llm(MODEL_NAME, carica_in_4bit=True)
+LLM = create_llm(MODEL_NAME, load_in_4bit=True)
 
-PROMPT_GENERAZIONE = get_prompt_generazione()
+PROMPT_GENERAZIONE = get_generation_prompt()
 CHAIN_GENERAZIONE = PROMPT_GENERAZIONE | LLM | StrOutputParser()
 
-PROMPT_CORREZIONE = get_prompt_correzione()
+PROMPT_CORREZIONE = get_correction_prompt()
 CHAIN_CORREZIONE = PROMPT_CORREZIONE | LLM | StrOutputParser()

@@ -1,8 +1,4 @@
-"""Track model compute for four verified queries across the three systems.
-
-Run with: python -m benchmark.measure_flops
-Requires ``pip install floppy-tracker``. Models use the normal 4-bit loading.
-"""
+"""Track model compute for four verified queries across the three systems."""
 from __future__ import annotations
 
 import argparse

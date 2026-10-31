@@ -35,30 +35,30 @@ def _base(case: QueryCase, system: str) -> dict[str, Any]:
 
 def _pipeline_fields(out: dict[str, Any], result: dict[str, Any]) -> None:
     """Keep query execution separate from the pipeline's semantic acceptance decision."""
-    rows = result.get("risultati_query")
-    classification = str(result.get("classificazione") or "").upper()
-    decision = result.get("valutazione")
-    out.update(result=rows, sql=result.get("query_corrente"), pipeline_status=result.get("esito"),
-               agent_decision=decision, agent_error=result.get("messaggio_errore"),
-               attempts=result.get("tentativi_miglioramento"))
+    rows = result.get("query_results")
+    classification = str(result.get("classification") or "").upper()
+    decision = result.get("evaluation")
+    out.update(result=rows, sql=result.get("current_query"), pipeline_status=result.get("outcome"),
+               agent_decision=decision, agent_error=result.get("error_message"),
+               attempts=result.get("improvement_attempts"))
     if rows is not None:
-        if isinstance(rows, str) and not rows.strip() and not (result.get("query_corrente") or "").strip():
+        if isinstance(rows, str) and not rows.strip() and not (result.get("current_query") or "").strip():
             out["status"] = "execution_error"
-            out["error"] = result.get("messaggio_errore") or "The pipeline produced no SQL query or result."
+            out["error"] = result.get("error_message") or "The pipeline produced no SQL query or result."
             out["note"] = "The pipeline exhausted its attempts without producing an executable SQL query."
             return
         out["status"] = "success"
-        if result.get("esito") != "successo":
-            if str(result.get("informazioni_estratte") or "").startswith("TASK=NEXT_ACTIVITY_PREDICTION"):
-                out["note"] = "Query eseguita ma senza un'attività successiva corrispondente; valutata contro l'atteso come risultato vuoto."
+        if result.get("outcome") != "SUCCESS":
+            if str(result.get("extracted_information") or "").startswith("TASK=NEXT_ACTIVITY_PREDICTION"):
+                out["note"] = "The query ran but found no matching next activity; its empty result was compared with the expected result."
             else:
-                out["note"] = "La query ha restituito un risultato, ma il pipeline non l'ha accettato come risposta finale; valutata comunque contro l'atteso."
-    elif classification == "FUORI_CONTESTO":
+                out["note"] = "The query returned a result, but the pipeline did not accept it as the final answer; it was still compared with the expected result."
+    elif classification == "OUT_OF_CONTEXT":
         out["status"] = "out_of_context"
-        out["error"] = result.get("messaggio_errore")
+        out["error"] = result.get("error_message")
     else:
         out["status"] = "execution_error"
-        out["error"] = result.get("messaggio_errore")
+        out["error"] = result.get("error_message")
 
 
 def run_orchestrator(case: QueryCase, database: Path | None = None, max_attempts: int = 3) -> dict[str, Any]:
@@ -70,7 +70,7 @@ def run_orchestrator(case: QueryCase, database: Path | None = None, max_attempts
         import agenti.response_agent as response_module
         import orchestratore.orchestratore as pipeline_module
 
-        pipeline_module.MAX_TENTATIVI = max_attempts
+        pipeline_module.MAX_ATTEMPTS = max_attempts
 
         database = database or Path(__file__).resolve().parents[1] / "databases" / "container_logistics.sqlite"
         db = SQLDatabase.from_uri(f"sqlite:///{database.resolve().as_posix()}")
@@ -78,14 +78,14 @@ def run_orchestrator(case: QueryCase, database: Path | None = None, max_attempts
         utils_module.DB = db
         response_module.DB = db
         pipeline_module.DB = db
-        state = pipeline_module.crea_stato_iniziale(case.question)
-        state["schema_database"] += orchestrator_schema_guidance(database)
+        state = pipeline_module.create_initial_state(case.question)
+        state["database_schema"] += orchestrator_schema_guidance(database)
         specification = _nsp_specification(case)
         if not specification:
             specification = _relational_specification(case)
         if specification:
-            state["classificazione"] = "IN_CONTESTO"
-            state["informazioni_estratte"] = specification
+            state["classification"] = "IN_CONTEXT"
+            state["extracted_information"] = specification
         # Graph execution API and state keys are the repository's actual interface.
         result = pipeline_module.PIPELINE.invoke(state, config={"recursion_limit": 30})
         _pipeline_fields(out, result)
@@ -312,8 +312,8 @@ class PMAgentAdapter:
         from langchain_community.utilities import SQLDatabase
         import agenti.response_agent as response_module
         import orchestratore.orchestratore as pipeline_module
-        from experiments.next_step import DBConTimeout
-        self._modules = (SQLDatabase, response_module, pipeline_module, DBConTimeout)
+        from benchmark.next_step import DatabaseWithTimeout
+        self._modules = (SQLDatabase, response_module, pipeline_module, DatabaseWithTimeout)
         return self._modules
 
     def run(self, case: QueryCase) -> dict[str, Any]:
@@ -337,21 +337,21 @@ class PMAgentAdapter:
         started = time.perf_counter()
         try:
             flat_db = self.flattenings.for_type(str(object_type))
-            SQLDatabase, response_module, pipeline_module, DBConTimeout = self._load()
-            pipeline_module.MAX_TENTATIVI = self.max_attempts
+            SQLDatabase, response_module, pipeline_module, DatabaseWithTimeout = self._load()
+            pipeline_module.MAX_ATTEMPTS = self.max_attempts
             real_db = SQLDatabase.from_uri(f"sqlite:///{flat_db.as_posix()}")
-            db = DBConTimeout(real_db, flat_db, int(self.timeout))
+            db = DatabaseWithTimeout(real_db, flat_db, int(self.timeout))
             response_module.DB = db
             pipeline_module.DB = db
             state = {
-                "richiesta_utente": case.question, "schema_database": db.get_table_info(),
-                "classificazione": None, "informazioni_estratte": None, "query_corrente": None,
-                "valutazione": None, "feedback_valutazione": None, "tentativi_miglioramento": 0,
-                "risultati_query": None, "risposta_finale": None, "esito": None, "messaggio_errore": None,
+                "user_request": case.question, "database_schema": db.get_table_info(),
+                "classification": None, "extracted_information": None, "current_query": None,
+                "evaluation": None, "evaluation_feedback": None, "improvement_attempts": 0,
+                "query_results": None, "final_answer": None, "outcome": None, "error_message": None,
             }
             if specification:
-                state["classificazione"] = "IN_CONTESTO"
-                state["informazioni_estratte"] = specification
+                state["classification"] = "IN_CONTEXT"
+                state["extracted_information"] = specification
             result = pipeline_module.PIPELINE.invoke(state, config={"recursion_limit": 30})
             _pipeline_fields(out, result)
         except Exception as exc:

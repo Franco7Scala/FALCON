@@ -62,7 +62,7 @@ def raw_object_type(path: Path, label: str) -> str | None:
 
 def create_type_flattening(source: Path, object_type: str, directory: Path) -> Path:
     """Copy source DB, then build next_step_data's container_trace for one type only."""
-    from experiments.next_step_data import crea_tabella_tracce
+    from benchmark.next_step_data import build_trace_table
     directory.mkdir(parents=True, exist_ok=True)
     safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in object_type)
     target = directory / f"pmagent_{safe}.sqlite"
@@ -71,7 +71,7 @@ def create_type_flattening(source: Path, object_type: str, directory: Path) -> P
     if raw_type is None:
         raise ValueError(f"No OCEL object type maps to {object_type!r}")
     with sqlite3.connect(target) as con:
-        crea_tabella_tracce(con, facilitato=False, tipo_caso=raw_type)
+        build_trace_table(con, simplified=False, case_type=raw_type)
         # Workbook prefixes/expected activities use the mapped compact activity labels.
         con.execute("""UPDATE container_trace SET activity=(
             SELECT ocel_type_map FROM event_map_type WHERE event_map_type.ocel_type=container_trace.activity

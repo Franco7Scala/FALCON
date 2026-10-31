@@ -2,52 +2,50 @@
 from typing import Optional, Tuple
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from utils.utils import crea_llm
+from utils.utils import create_llm
 
 # Text-only instruction model; compatible with the current causal-LM loader.
 MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct"
 
 
-def _estrai_dopo_etichetta(testo: str, etichetta: str, fino_a: Optional[str] = None) -> Optional[str]:
+def _extract_after_label(text: str, label: str, until_label: Optional[str] = None) -> Optional[str]:
     """
-    Returns the text following "<etichetta>:" up to the next occurrence of
-    "<fino_a>:" (if given), or to the end of the string otherwise. Returns
+    Returns the text following "<label>:" up to the next occurrence of
+    "<until_label>:" (if given), or to the end of the string otherwise. Returns
     None if the label itself is not found.
     """
-    testo_upper = testo.upper()
-    marcatore = f"{etichetta.upper()}:"
-    indice_inizio = testo_upper.find(marcatore)
-    if indice_inizio == -1:
+    uppercase_text = text.upper()
+    marker = f"{label.upper()}:"
+    start_index = uppercase_text.find(marker)
+    if start_index == -1:
         return None
 
-    inizio_contenuto = indice_inizio + len(marcatore)
+    content_start = start_index + len(marker)
 
-    if fino_a is not None:
-        indice_fine = testo_upper.find(f"{fino_a.upper()}:", inizio_contenuto)
-        if indice_fine != -1:
-            return testo[inizio_contenuto:indice_fine].strip() or None
+    if until_label is not None:
+        end_index = uppercase_text.find(f"{until_label.upper()}:", content_start)
+        if end_index != -1:
+            return text[content_start:end_index].strip() or None
 
-    return testo[inizio_contenuto:].strip() or None
+    return text[content_start:].strip() or None
 
 
-def _analizza_estrazione(testo: str) -> Tuple[str, Optional[str]]:
+def _parse_extraction(text: str) -> Tuple[str, Optional[str]]:
     """
-    Parses the raw output of the extraction prompt. Expected format:
-    "CLASSIFICAZIONE: FUORI_CONTESTO" or "CLASSIFICAZIONE: IN_CONTESTO
-    INFORMAZIONI: <relevant information>"
-    Returns (classificazione, informazioni_estratte).
+    Parse the extraction prompt output, translating its English labels into
+    the existing internal classification values.
     """
-    testo_pulito = testo.strip()
+    clean_text = text.strip()
 
-    if "FUORI_CONTESTO" in testo_pulito.upper():
-        return "FUORI_CONTESTO", None
+    if "OUT_OF_CONTEXT" in clean_text.upper():
+        return "OUT_OF_CONTEXT", None
 
-    informazioni = _estrai_dopo_etichetta(testo_pulito, "INFORMAZIONI")
-    return "IN_CONTESTO", informazioni or testo_pulito
+    information = _extract_after_label(clean_text, "INFORMATION")
+    return "IN_CONTEXT", information or clean_text
 
 
-# estrai_informazioni: classifies the request and extracts relevant info
-def get_prompt_estrazione() -> ChatPromptTemplate:
+# Classifies the request and extracts relevant information.
+def get_extraction_prompt() -> ChatPromptTemplate:
     return ChatPromptTemplate.from_messages([
         (
             "system",
@@ -61,15 +59,15 @@ def get_prompt_estrazione() -> ChatPromptTemplate:
 
             CLASSIFICATION RULES:
 
-            1. Classify a request as IN_CONTESTO if it can be answered using
+            1. Classify a request as IN_CONTEXT if it can be answered using
                the tables and columns in the provided schema.
 
-            2. Classify a request as FUORI_CONTESTO only if it cannot be answered
+            2. Classify a request as OUT_OF_CONTEXT only if it cannot be answered
                using the available schema, or if it concerns information that is
                fundamentally unrelated to the database.
 
             3. A request about predicting the next activity in a process trace
-               is IN_CONTESTO if the schema provides the information needed to
+               is IN_CONTEXT if the schema provides the information needed to
                reconstruct event sequences, such as case identifiers, activity
                names, and event ordering.
                
@@ -77,7 +75,7 @@ def get_prompt_estrazione() -> ChatPromptTemplate:
                by the user are VALUES of an activity column. They do not need
                to be column names or table names.
 
-            5. Never classify a request as FUORI_CONTESTO merely because:
+            5. Never classify a request as OUT_OF_CONTEXT merely because:
                - the request contains a sequence of activities;
                - an activity appears multiple times;
                - the prefix is long;
@@ -87,7 +85,7 @@ def get_prompt_estrazione() -> ChatPromptTemplate:
 
             INFORMATION EXTRACTION RULES:
 
-            If the request is IN_CONTESTO, extract the information required
+            If the request is IN_CONTEXT, extract the information required
             to generate the SQL query.
 
             For a next-activity prediction request:
@@ -108,8 +106,8 @@ def get_prompt_estrazione() -> ChatPromptTemplate:
 
             Return the result in exactly this format:
 
-            CLASSIFICAZIONE: IN_CONTESTO
-            INFORMAZIONI: TASK=NEXT_ACTIVITY_PREDICTION;
+            CLASSIFICATION: IN_CONTEXT
+            INFORMATION: TASK=NEXT_ACTIVITY_PREDICTION;
             PREFIX=[activity_1, activity_2, ..., activity_k];
             CASE_ID=<explicit case/object id, or NONE>;
             OBJECT_TYPE=<explicit object type, or NONE>;
@@ -121,34 +119,33 @@ def get_prompt_estrazione() -> ChatPromptTemplate:
 
             If the request is out of context, return exactly:
 
-            CLASSIFICAZIONE: FUORI_CONTESTO
+            CLASSIFICATION: OUT_OF_CONTEXT
 
             Do not add explanations before or after the required output.
             Do not invent information that is absent from the user's request.
             """
         ),
-            ("human", "Request: \"{richiesta}\""),
+            ("human", "Request: \"{request}\""),
         ]
     )
 
 
-def estrai_informazioni(richiesta_utente: str, schema_database: str) -> Tuple[str, Optional[str]]:
+def extract_information(user_request: str, database_schema: str) -> Tuple[str, Optional[str]]:
     """
-    Runs Agent 1's extraction step. Returns (classificazione,
-    informazioni_estratte): classificazione is "FUORI_CONTESTO" or
-    "IN_CONTESTO"; informazioni_estratte is None in the first case.
+    Run Agent 1's extraction step. Return the internal classification and
+    extracted information; the latter is None for out-of-context requests.
     """
-    output_grezzo = CHAIN_ESTRAZIONE.invoke(
+    raw_output = CHAIN_ESTRAZIONE.invoke(
         {
-            "schema": schema_database,
-            "richiesta": richiesta_utente,
+            "schema": database_schema,
+            "request": user_request,
         }
     )
-    return _analizza_estrazione(output_grezzo)
+    return _parse_extraction(raw_output)
 
 
 # Initialization of model, prompt and chain
-LLM = crea_llm(MODEL_NAME, carica_in_4bit=True)
+LLM = create_llm(MODEL_NAME, load_in_4bit=True)
 
-PROMPT_ESTRAZIONE = get_prompt_estrazione()
+PROMPT_ESTRAZIONE = get_extraction_prompt()
 CHAIN_ESTRAZIONE = PROMPT_ESTRAZIONE | LLM | StrOutputParser()

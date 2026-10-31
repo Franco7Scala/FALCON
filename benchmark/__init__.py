@@ -1,1 +1,1 @@
-"""Comparative OCEL query benchmark framework."""
+# benchmark/__init__.py

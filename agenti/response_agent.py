@@ -6,52 +6,47 @@ import re
 from typing import Optional
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from utils.utils import crea_llm, DB
+from utils.utils import create_llm, DB
 
 # Text-only instruction model; compatible with the current causal-LM loader.
 MODEL_NAME = "Qwen/Qwen2.5-14B-Instruct"
 
 
-def _estrai_dopo_etichetta(testo: str, etichetta: str, fino_a: Optional[str] = None) -> Optional[str]:
+def _extract_after_label(text: str, label: str, until_label: Optional[str] = None) -> Optional[str]:
     """
-    Returns the text following "<etichetta>:" up to the next occurrence of
-    "<fino_a>:" (if given), or to the end of the string otherwise. Returns
+    Return the text following "<label>:" up to the next occurrence of
+    "<until_label>:" (if given), or to the end of the string. Return
     None if the label itself is not found.
     """
-    testo_upper = testo.upper()
-    marcatore = f"{etichetta.upper()}:"
-    indice_inizio = testo_upper.find(marcatore)
-    if indice_inizio == -1:
+    uppercase_text = text.upper()
+    marker = f"{label.upper()}:"
+    start_index = uppercase_text.find(marker)
+    if start_index == -1:
         return None
 
-    inizio_contenuto = indice_inizio + len(marcatore)
+    content_start = start_index + len(marker)
 
-    if fino_a is not None:
-        indice_fine = testo_upper.find(f"{fino_a.upper()}:", inizio_contenuto)
-        if indice_fine != -1:
-            return testo[inizio_contenuto:indice_fine].strip() or None
+    if until_label is not None:
+        end_index = uppercase_text.find(f"{until_label.upper()}:", content_start)
+        if end_index != -1:
+            return text[content_start:end_index].strip() or None
 
-    return testo[inizio_contenuto:].strip() or None
+    return text[content_start:].strip() or None
 
 
-def _analizza_valutazione_risultati(testo: str):
+def _parse_result_evaluation(text: str):
     """
-    Parses the raw output of the result-evaluation prompt. Expected format:
-    "ESITO: SODDISFATTA
-     RISPOSTA: <final natural-language answer>"
-    or
-    "ESITO: DA_RIGENERARE
-     FEEDBACK: <what's wrong with the query/results>"
-    Returns (valutazione, risposta_finale, feedback).
+    Parse the English result-evaluation labels and map them to the internal
+    status values used by the pipeline.
     """
-    testo_pulito = testo.strip()
+    clean_text = text.strip()
 
-    if "SODDISFATTA" in testo_pulito.upper():
-        risposta = _estrai_dopo_etichetta(testo_pulito, "RISPOSTA")
-        return "SODDISFATTA", (risposta or testo_pulito), None
+    if "SATISFIED" in clean_text.upper():
+        answer = _extract_after_label(clean_text, "ANSWER")
+        return "SATISFIED", (answer or clean_text), None
 
-    feedback = _estrai_dopo_etichetta(testo_pulito, "FEEDBACK")
-    return "DA_RIGENERARE", None, (feedback or testo_pulito)
+    feedback = _extract_after_label(clean_text, "FEEDBACK")
+    return "REGENERATE", None, (feedback or clean_text)
 
 
 # Caps on how much of a query result is shown to the evaluation LLM. The FULL
@@ -60,60 +55,60 @@ def _analizza_valutazione_risultati(testo: str):
 # cap, a query returning tens of thousands of rows (e.g. a SELECT * where a
 # COUNT(*) was needed) puts millions of tokens in the prompt and runs the
 # GPU out of memory.
-MAX_RIGHE_NEL_PROMPT = 20
-MAX_CARATTERI_NEL_PROMPT = 4000
+MAX_ROWS_IN_PROMPT = 20
+MAX_CHARS_IN_PROMPT = 4000
 
 
-def _riassumi_risultati(risultati: str) -> str:
+def _summarize_results(results: str) -> str:
     """
     Builds a bounded description of a raw query result (the string returned
     by DB.run, i.e. str() of a list of row tuples) for use inside the prompt:
     total number of rows, number of columns, and only the first
-    MAX_RIGHE_NEL_PROMPT rows. The total row count is deliberately always
+    MAX_ROWS_IN_PROMPT rows. The total row count is deliberately always
     included: it is exactly what lets the evaluator notice that a "how many"
     question got thousands of raw rows back instead of a single number.
     """
-    if not risultati or not risultati.strip() or risultati.strip() == "[]":
-        return "Numero totale di righe restituite: 0 (risultato vuoto)"
+    if not results or not results.strip() or results.strip() == "[]":
+        return "Total rows returned: 0 (empty result)"
 
-    righe = None
+    rows = None
     try:
-        valore = ast.literal_eval(risultati)
-        if isinstance(valore, list):
-            righe = valore
+        value = ast.literal_eval(results)
+        if isinstance(value, list):
+            rows = value
     except (ValueError, SyntaxError, MemoryError, RecursionError):
-        righe = None
+        rows = None
 
-    if righe is not None:
-        totale = len(righe)
-        prima = righe[0] if righe else None
-        colonne = len(prima) if isinstance(prima, tuple) else 1
-        anteprima = str(righe[:MAX_RIGHE_NEL_PROMPT])
-        intestazione = f"Numero totale di righe restituite: {totale}; colonne per riga: {colonne}."
+    if rows is not None:
+        total = len(rows)
+        first_row = rows[0] if rows else None
+        columns = len(first_row) if isinstance(first_row, tuple) else 1
+        preview = str(rows[:MAX_ROWS_IN_PROMPT])
+        header_text = f"Total rows returned: {total}; columns per row: {columns}."
     else:
         # Not parseable as a Python literal (e.g. it contains datetime objects):
         # estimate the row count from the tuple separators and cut by characters.
-        totale = risultati.count("), (") + 1
-        anteprima = risultati
-        intestazione = f"Numero totale di righe restituite (stimato): {totale}."
+        total = results.count("), (") + 1
+        preview = results
+        header_text = f"Estimated total rows returned: {total}."
 
-    if totale > MAX_RIGHE_NEL_PROMPT:
-        intestazione += f" Sono mostrate solo le prime {MAX_RIGHE_NEL_PROMPT}:"
+    if total > MAX_ROWS_IN_PROMPT:
+        header_text += f" Showing the first {MAX_ROWS_IN_PROMPT} rows:"
 
-    if len(anteprima) > MAX_CARATTERI_NEL_PROMPT:
-        anteprima = anteprima[:MAX_CARATTERI_NEL_PROMPT] + " ...[troncato]"
+    if len(preview) > MAX_CHARS_IN_PROMPT:
+        preview = preview[:MAX_CHARS_IN_PROMPT] + " ...[truncated]"
 
-    return f"{intestazione}\n{anteprima}"
+    return f"{header_text}\n{preview}"
 
 
-def _valore_booleano_sql(risultati: str):
+def _sql_boolean_value(results: str):
     """Return a bool only for a single-cell SQL result with a boolean value."""
-    if not risultati or not risultati.strip():
+    if not results or not results.strip():
         return None
     try:
-        value = ast.literal_eval(risultati)
+        value = ast.literal_eval(results)
     except (ValueError, SyntaxError, MemoryError, RecursionError):
-        value = risultati.strip()
+        value = results.strip()
     if isinstance(value, dict):
         if len(value) != 1:
             return None
@@ -143,10 +138,10 @@ def _valore_booleano_sql(risultati: str):
     return None
 
 
-def _valida_forma_probabilita(risultati: str, shape: str) -> Optional[str]:
+def _validate_probability_shape(results: str, shape: str) -> Optional[str]:
     """Reject probability SQL that does not return the benchmark's declared shape."""
     try:
-        value = ast.literal_eval(risultati)
+        value = ast.literal_eval(results)
     except (ValueError, SyntaxError, MemoryError, RecursionError):
         return "The probability query did not return a parseable tabular result."
     if not isinstance(value, list) or not value:
@@ -177,10 +172,10 @@ def _valida_forma_probabilita(risultati: str, shape: str) -> Optional[str]:
     return None
 
 
-def _controllo_booleano_statico(richiesta: str, query: str, schema: str) -> Optional[str]:
+def _static_boolean_check(request: str, query: str, schema: str) -> Optional[str]:
     """Catch common OCEL boolean SQL mistakes before accepting the LLM judge."""
     sql = re.sub(r"\s+", " ", query).casefold()
-    question = richiesta.casefold()
+    question = request.casefold()
 
     # OCEL event/object identifiers are separate domains. They must be linked
     # through event_object, never by joining their similarly named id columns.
@@ -234,7 +229,7 @@ def _controllo_booleano_statico(richiesta: str, query: str, schema: str) -> Opti
     return None
 
 
-def get_prompt_valutazione_risultati():
+def get_result_evaluation_prompt():
     return ChatPromptTemplate.from_messages([
         (
             "system",
@@ -294,17 +289,17 @@ def get_prompt_valutazione_risultati():
             10. If the query correctly implements the task and returns a
                 predicted activity, return:
             
-                ESITO: SODDISFATTA
-                RISPOSTA: <predicted activity>
+                OUTCOME: SATISFIED
+                ANSWER: <predicted activity>
             
             11. If the query correctly implements the task but returns no
                 rows because no matching training trace or next activity
                 exists, return:
             
-                ESITO: SODDISFATTA
-                RISPOSTA: UNKNOWN
+                OUTCOME: SATISFIED
+                ANSWER: UNKNOWN
             
-            12. Return DA_RIGENERARE only when you can identify a concrete
+            12. Return OUTCOME: REGENERATE only when you can identify a concrete
                 logical or SQL error in the query.
             
             When a correction is required, the feedback MUST be in English.
@@ -320,7 +315,7 @@ def get_prompt_valutazione_risultati():
             - If the executed query accesses the correct tables and applies the correct aggregation/filtering, ACCEPT IT.
             - DO NOT reject a query for missing JOINs to generic mapping or parent tables if it correctly extracts the requested data from a specific subtype table directly.
             - Do not reject valid SQL simply because there is an alternative way to write it.
-            - If it is a scalar query, returns a single numeric result, and the logic aligns with the question, return ESITO: SODDISFATTA.
+            - If it is a scalar query, returns a single numeric result, and the logic aligns with the question, return OUTCOME: SATISFIED.
             - If it is a set query asking for Top-K, verify it has an ORDER BY ... LIMIT clause and accept it.
             - For SET queries, if the question does not explicitly request a specific order, ignore the ordering of the returned rows when evaluating correctness.
 
@@ -351,7 +346,7 @@ def get_prompt_valutazione_risultati():
             "human",
             """
             Original user request:
-            {richiesta}
+            {request}
 
             Database schema:
             {schema}
@@ -360,7 +355,7 @@ def get_prompt_valutazione_risultati():
             {query}
             
             Raw query results:
-            {risultati_query}
+            {query_results}
             
             Evaluate the query according to the rules above.
             """
@@ -368,30 +363,30 @@ def get_prompt_valutazione_risultati():
     ])
 
 
-def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] = None,
-                    schema_database: Optional[str] = None) -> dict:
+def execute_and_evaluate(user_request: str, query: str, task_info: Optional[str] = None,
+                    database_schema: Optional[str] = None) -> dict:
     """
     Executes `query` against the shared database connection (utils.DB) and
-    evaluates whether its results satisfy richiesta_utente.
+    evaluates whether its results satisfy the original user request.
 
     Returns a dict with keys:
-        valutazione     - "SODDISFATTA" | "DA_RIGENERARE"
+        valutazione     - "SATISFIED" | "REGENERATE"
         risultati_query - raw result of the execution, or None if it failed
-        risposta_finale - final natural-language answer (set only when SODDISFATTA)
+        risposta_finale - final natural-language answer (set only when SATISFIED)
         feedback        - explanation of what's wrong, for Agent 2's next
-                           attempt (set only when DA_RIGENERARE - either a
+                           attempt (set only when REGENERATE - either a
                            database execution error or a semantic mismatch
                            identified by the evaluation)
     """
     try:
-        risultati = DB.run(query)
-    except Exception as errore:
+        results = DB.run(query)
+    except Exception as error:
         return \
         {
-            "valutazione": "DA_RIGENERARE",
+            "valutazione": "REGENERATE",
             "risultati_query": None,
             "risposta_finale": None,
-            "feedback": f"La query ha generato un errore di esecuzione sul database: {errore}",
+            "feedback": f"The query caused a database execution error: {error}",
         }
 
     # Structured NSP queries are generated from the workbook's exact case,
@@ -401,10 +396,10 @@ def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] 
     if (task_info or "").startswith("TASK=NEXT_ACTIVITY_PREDICTION"):
         parsed = None
         try:
-            parsed = ast.literal_eval(risultati) if risultati else []
+            parsed = ast.literal_eval(results) if results else []
         except (ValueError, SyntaxError, MemoryError, RecursionError):
             pass
-        no_answer = not risultati or not risultati.strip() or risultati.strip() in {"[]", "None"}
+        no_answer = not results or not results.strip() or results.strip() in {"[]", "None"}
         if isinstance(parsed, (list, tuple)):
             no_answer = no_answer or not parsed
             if parsed:
@@ -413,8 +408,8 @@ def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] 
                 no_answer = no_answer or value is None or value == ""
         if no_answer:
             return {
-                "valutazione": "DA_RIGENERARE",
-                "risultati_query": risultati,
+                "valutazione": "REGENERATE",
+                "risultati_query": results,
                 "risposta_finale": None,
                 "feedback": "The structured next-activity query returned no matching next event. Verify the case/object, complete prefix, and ordering.",
             }
@@ -422,20 +417,20 @@ def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] 
             first = parsed[0]
             answer = first[0] if isinstance(first, (tuple, list)) else first
         except (ValueError, SyntaxError, TypeError, IndexError):
-            answer = risultati
+            answer = results
         return {
-            "valutazione": "SODDISFATTA",
-            "risultati_query": risultati,
+            "valutazione": "SATISFIED",
+            "risultati_query": results,
             "risposta_finale": str(answer),
             "feedback": None,
         }
 
     if (task_info or "").startswith("TASK=BOOLEAN_QUERY"):
-        boolean_value = _valore_booleano_sql(risultati)
+        boolean_value = _sql_boolean_value(results)
         if boolean_value is None:
             return {
-                "valutazione": "DA_RIGENERARE",
-                "risultati_query": risultati,
+                "valutazione": "REGENERATE",
+                "risultati_query": results,
                 "risposta_finale": None,
                 "feedback": (
                     "This is a boolean task. Return exactly one row and one column "
@@ -448,36 +443,36 @@ def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] 
         shape_match = re.search(r"(?m)^SHAPE=(numeric|distribution)$", task_info or "")
         if not shape_match:
             return {
-                "valutazione": "DA_RIGENERARE",
-                "risultati_query": risultati,
+                "valutazione": "REGENERATE",
+                "risultati_query": results,
                 "risposta_finale": None,
                 "feedback": "The structured probability request is missing its output shape.",
             }
-        feedback_probability = _valida_forma_probabilita(risultati, shape_match.group(1))
+        feedback_probability = _validate_probability_shape(results, shape_match.group(1))
         if feedback_probability:
             return {
-                "valutazione": "DA_RIGENERARE",
-                "risultati_query": risultati,
+                "valutazione": "REGENERATE",
+                "risultati_query": results,
                 "risposta_finale": None,
                 "feedback": feedback_probability,
             }
-        feedback_booleano = _controllo_booleano_statico(
-            richiesta_utente, query, schema_database or ""
+        feedback_booleano = _static_boolean_check(
+            user_request, query, database_schema or ""
         )
         if feedback_booleano:
             return {
-                "valutazione": "DA_RIGENERARE",
-                "risultati_query": risultati,
+                "valutazione": "REGENERATE",
+                "risultati_query": results,
                 "risposta_finale": None,
                 "feedback": feedback_booleano,
             }
 
     output_grezzo = CHAIN_VALUTAZIONE.invoke(
         {
-            "richiesta": richiesta_utente,
+            "request": user_request,
             "query": query,
-            "schema": schema_database or "",
-            "risultati_query": _riassumi_risultati(risultati),
+            "schema": database_schema or "",
+            "query_results": _summarize_results(results),
         }
     )
 
@@ -486,19 +481,19 @@ def esegui_e_valuta(richiesta_utente: str, query: str, task_info: Optional[str] 
     print(repr(output_grezzo))
     print("=============================================\n")
 
-    valutazione, risposta_finale, feedback = _analizza_valutazione_risultati(output_grezzo)
+    evaluation, final_answer, feedback = _parse_result_evaluation(output_grezzo)
 
     return \
     {
-        "valutazione": valutazione,
-        "risultati_query": risultati,
-        "risposta_finale": risposta_finale,
+        "valutazione": evaluation,
+        "risultati_query": results,
+        "risposta_finale": final_answer,
         "feedback": feedback,
     }
 
 
 # Initialization of model, prompt and chain
-LLM = crea_llm(MODEL_NAME, carica_in_4bit=True)
+LLM = create_llm(MODEL_NAME, load_in_4bit=True)
 
-PROMPT_VALUTAZIONE = get_prompt_valutazione_risultati()
+PROMPT_VALUTAZIONE = get_result_evaluation_prompt()
 CHAIN_VALUTAZIONE = PROMPT_VALUTAZIONE | LLM | StrOutputParser()

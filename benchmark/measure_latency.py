@@ -1,7 +1,4 @@
-"""Measure response time for four verified questions across the three systems.
-
-Run with: python -m benchmark.measure_latency
-"""
+"""Measure response time for four verified questions across the three systems."""
 from __future__ import annotations
 
 import argparse
