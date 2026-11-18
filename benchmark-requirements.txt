@@ -1,5 +1,0 @@
-openpyxl==3.1.5
-pandas>=2.2,<4
-duckdb>=1.1,<2
-pm4py[llm,ocel]==2.7.23.11
-floppy-tracker>=0.2.2,<0.3

@@ -1,6 +1,0 @@
-source_type,target_type,cnt
-Container,Handling Unit,10553
-Container,Transport Document,1999
-Truck,Container,1997
-Transport Document,Vehicle,777
-Customer Order,Transport Document,594
