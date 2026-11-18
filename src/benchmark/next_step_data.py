@@ -73,7 +73,7 @@ def create_split(
     Returns (dev_cases, test_cases, training_ids). The first two are lists of
     (case_id, prefix, target): for each held-out case a random cut point
     1..len-1 is drawn, prefix = activities before it, target = the next one
-    (same procedure as the original PMAgent script). Only traces with at
+    (following standard trace-splitting procedure). Only traces with at
     least 2 events are usable. Deterministic for a given seed.
     """
     usable_cases = sorted(case for case, t in traces.items() if len(t) > 1)
